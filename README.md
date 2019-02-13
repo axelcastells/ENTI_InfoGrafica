@@ -1,1 +1,0 @@
-# ENTI_InfoGrafica
