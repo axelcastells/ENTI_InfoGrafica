@@ -8,6 +8,12 @@
 #include <imgui\imgui_impl_sdl_gl3.h>
 
 #include "GL_framework.h"
+#include <vector>
+
+namespace ModelLoader {
+	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
+}
+
 
 ///////// fw decl
 namespace ImGui {
@@ -375,6 +381,111 @@ void main() {\n\
 		glBindVertexArray(0);
 		glDisable(GL_PRIMITIVE_RESTART);
 	}
+
+	
+}
+
+namespace Model {
+	// MODEL
+	std::vector< glm::vec3> out_vertices;
+	std::vector< glm::vec2> out_uvs;
+	std::vector< glm::vec3> out_normals;
+
+	GLuint cubeVao;
+	GLuint cubeVbo[3];
+	GLuint shaders[2];
+	GLuint program;
+	glm::mat4 objMat = glm::mat4(1.f);
+
+	const char* model_vertShader =
+		"#version 330\n\
+in vec3 in_Position;\n\
+in vec3 in_Normal;\n\
+out vec4 vert_Normal;\n\
+uniform mat4 objMat;\n\
+uniform mat4 mv_Mat;\n\
+uniform mat4 mvpMat;\n\
+void main() {\n\
+	gl_Position = mvpMat * objMat * vec4(in_Position, 1.0);\n\
+	vert_Normal = mv_Mat * objMat * vec4(in_Normal, 0.0);\n\
+}";
+	const char* model_fragShader =
+		"#version 330\n\
+in vec4 vert_Normal;\n\
+out vec4 out_Color;\n\
+uniform mat4 mv_Mat;\n\
+uniform vec4 color;\n\
+void main() {\n\
+	out_Color = vec4(color.xyz * dot(vert_Normal, mv_Mat*vec4(0.0, 1.0, 0.0, 0.0)) + color.xyz * 0.3, 1.0 );\n\
+}";
+
+	void setupModel() {
+
+		ModelLoader::LoadOBJ("deer.obj", out_vertices, out_uvs, out_normals);
+
+		glGenVertexArrays(1, &cubeVao);
+		glBindVertexArray(cubeVao);
+		glGenBuffers(3, cubeVbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(out_vertices), out_vertices.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(out_normals), out_normals.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		//glPrimitiveRestartIndex(UCHAR_MAX);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVbo[2]);
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIdx), cubeIdx, GL_STATIC_DRAW);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		shaders[0] = compileShader(model_vertShader, GL_VERTEX_SHADER, "model_vertShader");
+		shaders[1] = compileShader(model_fragShader, GL_FRAGMENT_SHADER, "model_fragShader");
+
+		program = glCreateProgram();
+		glAttachShader(program, shaders[0]);
+		glAttachShader(program, shaders[1]);
+		glBindAttribLocation(program, 0, "in_Position");
+		glBindAttribLocation(program, 1, "in_Normal");
+		linkProgram(program);
+	}
+	void cleanupModel() {
+		glDeleteBuffers(3, cubeVbo);
+		glDeleteVertexArrays(1, &cubeVao);
+
+		glDeleteProgram(program);
+		glDeleteShader(shaders[0]);
+		glDeleteShader(shaders[1]);
+	}
+	void updateModel(const glm::mat4& transform) {
+		objMat = transform;
+	}
+	void drawModel(float dt) {
+		glEnable(GL_PRIMITIVE_RESTART);
+		glBindVertexArray(cubeVao);
+		glUseProgram(program);
+
+		// Model Render
+
+		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniform4f(glGetUniformLocation(program, "color"), 0.1f, 1.f, 1.f, 0.f);
+
+		glDrawArrays(GL_TRIANGLES, 0, out_vertices.size());
+
+		//glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+		glDisable(GL_PRIMITIVE_RESTART);
+	}
 }
 
 /////////////////////////////////////////////////
@@ -413,8 +524,8 @@ void GLinit(int width, int height) {
 
 	// Setup shaders & geometry
 	Axis::setupAxis();
-	Cube::setupCube();
-
+	//Cube::setupCube();
+	Model::setupModel();
 
 	/////////////////////////////////////////////////////TODO
 	// Do your init code here
@@ -436,7 +547,8 @@ void GLinit(int width, int height) {
 
 void GLcleanup() {
 	Axis::cleanupAxis();
-	Cube::cleanupCube();
+	//Cube::cleanupCube();
+	Model::cleanupModel();
 
 	/////////////////////////////////////////////////////TODO
 	// Do your cleanup code here
@@ -461,7 +573,8 @@ void GLrender(float dt) {
 	RV::_MVP = RV::_projection * RV::_modelView;
 
 	Axis::drawAxis();
-	Cube::drawCube(dt);
+	//Cube::drawCube(dt);
+	Model::drawModel(dt);
 
 	static float accum = 0.f;
 	accum += dt;
