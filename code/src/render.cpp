@@ -467,18 +467,32 @@ void main() {\n\
 	}
 	void updateModel(const glm::mat4& transform) {
 		objMat = transform;
-		objMat = glm::scale(objMat, glm::vec3(0.005));
 	}
 	void drawModel(float dt) {
 		glBindVertexArray(cubeVao);
 		glUseProgram(program);
 
+		// OBJ 1
+
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::scale(trans, glm::vec3(0.005));
+		trans = glm::rotate<float>(trans, 0, glm::vec3(0, 1, 0));
+
+		updateModel(trans);
 		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniform4f(glGetUniformLocation(program, "color"), 0.1f, 1.f, 1.f, 0.f);
 
 		glDrawArrays(GL_TRIANGLES, 0, out_vertices.size());
+
+		// OBJ 2
+		//trans = glm::translate(trans, glm::vec3(0, 800, 0));
+		//updateModel(trans);
+
+		//glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		//glDrawArrays(GL_TRIANGLES, 0, out_vertices.size());
 
 		//glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
@@ -523,7 +537,7 @@ void GLinit(int width, int height) {
 
 	// Setup shaders & geometry
 	Axis::setupAxis();
-	//Cube::setupCube();
+	Cube::setupCube();
 	Model::setupModel();
 
 	/////////////////////////////////////////////////////TODO
@@ -546,7 +560,7 @@ void GLinit(int width, int height) {
 
 void GLcleanup() {
 	Axis::cleanupAxis();
-	//Cube::cleanupCube();
+	Cube::cleanupCube();
 	Model::cleanupModel();
 
 	/////////////////////////////////////////////////////TODO
@@ -572,8 +586,7 @@ void GLrender(float dt) {
 	RV::_MVP = RV::_projection * RV::_modelView;
 
 	Axis::drawAxis();
-	//Cube::drawCube(dt);
-	Model::updateModel(glm::mat4(1.0f));
+	Cube::drawCube(dt);
 	Model::drawModel(dt);
 
 	static float accum = 0.f;
