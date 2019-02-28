@@ -29,9 +29,9 @@ namespace Axis {
 ////////////////
 
 namespace RenderVars {
-	const float FOV = glm::radians(65.f);
-	const float zNear = 1.f;
-	const float zFar = 50.f;
+	float FOV = glm::radians(65.f);
+	float zNear = 1.f;
+	float zFar = 50.f;
 
 	glm::mat4 _projection;
 	glm::mat4 _modelView;
@@ -47,6 +47,14 @@ namespace RenderVars {
 
 	float panv[3] = { 0.f, -5.f, -15.f };
 	float rota[2] = { 0.f, 0.f };
+
+	void Zoom(float degrees) {
+		FOV += glm::radians(degrees);
+	}
+
+	void MoveCameraZ(float distance) {
+		//_cameraPoint = glm::translate(_cameraPoint, glm::vec3(0, 0, distance));
+	}
 }
 namespace RV = RenderVars;
 
