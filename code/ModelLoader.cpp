@@ -69,6 +69,16 @@ namespace ModelLoader {
 			glm::vec3 vertex = temp_vertices[vertexIndex - 1];
 			out_vertices.push_back(vertex);
 		}
+		for (unsigned int i = 0; i < uvIndices.size(); i++) {
+			unsigned int uvIndex = uvIndices[i];
+			glm::vec2 uv = temp_uvs[uvIndex - 1];
+			out_uvs.push_back(uv);
+		}
+		for (unsigned int i = 0; i < normalIndices.size(); i++) {
+			unsigned int normalIndex = normalIndices[i];
+			glm::vec3 normal = temp_vertices[normalIndex - 1];
+			out_normals.push_back(normal);
+		}
 
 		return true;
 	}

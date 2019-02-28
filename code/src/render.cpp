@@ -3,6 +3,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <cstdio>
 #include <cassert>
+#include <iostream>
 
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
@@ -10,10 +11,11 @@
 #include "GL_framework.h"
 #include <vector>
 
+#pragma region Externs
 namespace ModelLoader {
 	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
 }
-
+#pragma endregion
 
 ///////// fw decl
 namespace ImGui {
@@ -385,6 +387,7 @@ void main() {\n\
 	
 }
 
+////////////////////////////////////////////////// MODEL
 namespace Model {
 	// MODEL
 	std::vector< glm::vec3> out_vertices;
@@ -421,19 +424,19 @@ void main() {\n\
 
 	void setupModel() {
 
-		ModelLoader::LoadOBJ("deer.obj", out_vertices, out_uvs, out_normals);
+		ModelLoader::LoadOBJ("cube.obj", out_vertices, out_uvs, out_normals);
 
 		glGenVertexArrays(1, &cubeVao);
 		glBindVertexArray(cubeVao);
 		glGenBuffers(3, cubeVbo);
 
 		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(out_vertices), out_vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, out_vertices.size() * sizeof(glm::vec3), out_vertices.data(), GL_STATIC_DRAW);
 		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(out_normals), out_normals.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, out_normals.size() * sizeof(glm::vec3), out_normals.data(), GL_STATIC_DRAW);
 		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(1);
 
@@ -447,7 +450,6 @@ void main() {\n\
 
 		shaders[0] = compileShader(model_vertShader, GL_VERTEX_SHADER, "model_vertShader");
 		shaders[1] = compileShader(model_fragShader, GL_FRAGMENT_SHADER, "model_fragShader");
-
 		program = glCreateProgram();
 		glAttachShader(program, shaders[0]);
 		glAttachShader(program, shaders[1]);
@@ -465,13 +467,11 @@ void main() {\n\
 	}
 	void updateModel(const glm::mat4& transform) {
 		objMat = transform;
+		objMat = glm::scale(objMat, glm::vec3(0.005));
 	}
 	void drawModel(float dt) {
-		glEnable(GL_PRIMITIVE_RESTART);
 		glBindVertexArray(cubeVao);
 		glUseProgram(program);
-
-		// Model Render
 
 		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
@@ -484,7 +484,6 @@ void main() {\n\
 
 		glUseProgram(0);
 		glBindVertexArray(0);
-		glDisable(GL_PRIMITIVE_RESTART);
 	}
 }
 
@@ -532,14 +531,14 @@ void GLinit(int width, int height) {
 	// ...
 	//vert_shader = compileShader(vertext_shader_source, GL_VERTEX_SHADER, Cube::);
 	//frag_shader = compileShader(vertext_shader_source, GL_FRAGMENT_SHADER, cube_fragShader);
-	program = glCreateProgram();
-	glAttachShader(program, vert_shader);
-	glAttachShader(program, frag_shader);
-	linkProgram(program);
+	//program = glCreateProgram();
+	//glAttachShader(program, vert_shader);
+	//glAttachShader(program, frag_shader);
+	//linkProgram(program);
 
-	glGenVertexArrays(1, &vao_vert);
+	//glGenVertexArrays(1, &vao_vert);
 
-	glPointSize(40.0f);
+	//glPointSize(40.0f);
 	// ...
 	// ...
 	/////////////////////////////////////////////////////////
@@ -574,6 +573,7 @@ void GLrender(float dt) {
 
 	Axis::drawAxis();
 	//Cube::drawCube(dt);
+	Model::updateModel(glm::mat4(1.0f));
 	Model::drawModel(dt);
 
 	static float accum = 0.f;
