@@ -11,6 +11,9 @@
 #include "GL_framework.h"
 #include <vector>
 
+bool zoombutton;
+bool FOVbutton;
+
 #pragma region Externs
 namespace ModelLoader {
 	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
@@ -611,8 +614,8 @@ void GLrender(float dt) {
 	}
 
 
-	//RenderVars::Zoom(65.f + (glm::sin(accum)));
-	//RenderVars::MoveCameraZ(glm::cos(accum));
+	if(zoombutton)RenderVars::Zoom(65.f + (glm::sin(accum)*10));
+	if(FOVbutton)RenderVars::MoveCameraZ(glm::cos(accum));
 
 
 	Axis::drawAxis();
@@ -659,9 +662,13 @@ void GUI() {
 		//ImGui::DragFloat("Float",&f1,0.005f);
 
 		// Camera Movements
-		ImGui::Button("Zoom", ImVec2(50, 50));
-		ImGui::Button("FOV", ImVec2(50, 50));
-		ImGui::Button("Dolly",ImVec2(50,50));
+		
+		if(ImGui::Button("Zoom", ImVec2(50, 50)))zoombutton = !zoombutton;
+			
+		if(ImGui::Button("FOV", ImVec2(50, 50)))FOVbutton = !FOVbutton;
+		if(zoombutton)ImGui::Text("Current Camera Effect: Zoom");
+		if(FOVbutton)ImGui::Text("Current Camera Effect: FOV");
+		if(zoombutton && FOVbutton)ImGui::Text("Current Camera Effect: Dolly");
 		// ...
 		// ...
 		/////////////////////////////////////////////////////////
