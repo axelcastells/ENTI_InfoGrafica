@@ -433,9 +433,7 @@ out vec4 out_Color;\n\
 uniform mat4 mv_Mat;\n\
 uniform vec4 color;\n\
 void main() {\n\
-vec3 Light = normalize()\n\
-vec3 Eye = normalize(-gl_Position)\n\
-vec3 Reflect = normalize(-reflect(L,N))\n\
+
 	out_Color = vec4(color.xyz * dot(vert_Normal, mv_Mat*vec4(0.0, 1.0, 0.0, 0.0)) + color.xyz * 0.3, 1.0 );\n\
 }";
 
