@@ -15,6 +15,9 @@
 namespace ModelLoader {
 	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
 }
+namespace ResourcesManager {
+	extern std::string ReadFile(const char* filePath);
+}
 #pragma endregion
 
 ///////// fw decl
@@ -49,11 +52,14 @@ namespace RenderVars {
 	float rota[2] = { 0.f, 0.f };
 
 	void Zoom(float degrees) {
-		FOV += glm::radians(degrees);
+		FOV = glm::radians(degrees);
+		_projection = glm::perspective(FOV, 1.f, zNear, zFar);
 	}
 
 	void MoveCameraZ(float distance) {
-		//_cameraPoint = glm::translate(_cameraPoint, glm::vec3(0, 0, distance));
+		_projection = glm::translate(_projection, glm::vec3(0, 0, distance));// *_cameraPoint;
+		//_modelView = glm::translate()
+		//_projection = glm::translate()
 	}
 }
 namespace RV = RenderVars;
@@ -373,19 +379,19 @@ void main() {\n\
 		glUniform4f(glGetUniformLocation(cubeProgram, "color"), 0.1f, 1.f, 1.f, 0.f);
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
-		// Cube 2
+		//// Cube 2
 
-		glm::mat4 cube2mat(1.0f);
-		//cube2mat = glm::translate(objMat, glm::vec3(0, col[0], 8));
-		cube2mat = glm::scale(cube2mat, glm::vec3(1+col[0]));
-		cube2mat = glm::rotate(cube2mat, accum, glm::vec3(0, 1, 0));
+		//glm::mat4 cube2mat(1.0f);
+		////cube2mat = glm::translate(objMat, glm::vec3(0, col[0], 8));
+		//cube2mat = glm::scale(cube2mat, glm::vec3(1+col[0]));
+		//cube2mat = glm::rotate(cube2mat, accum, glm::vec3(0, 1, 0));
 
-		//cube2mat = glm::translate(cube2mat, vec)
-		cube2mat = glm::translate(cube2mat, glm::vec3(glm::cos(accum*.10f) + 3, 0, glm::sin(accum*.10f) + 3));
+		////cube2mat = glm::translate(cube2mat, vec)
+		//cube2mat = glm::translate(cube2mat, glm::vec3(glm::cos(accum*.10f) + 3, 0, glm::sin(accum*.10f) + 3));
 
-		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(cube2mat));
-		glUniform4f(glGetUniformLocation(cubeProgram, "color"), col[0], 0.f, 0.f, 0.f);
-		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		//glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(cube2mat));
+		//glUniform4f(glGetUniformLocation(cubeProgram, "color"), col[0], 0.f, 0.f, 0.f);
+		//glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -589,6 +595,8 @@ void GLcleanup() {
 void GLrender(float dt) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+
 	RV::_modelView = glm::mat4(1.f);
 	RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
 	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
@@ -596,9 +604,7 @@ void GLrender(float dt) {
 
 	RV::_MVP = RV::_projection * RV::_modelView;
 
-	Axis::drawAxis();
-	Cube::drawCube(dt);
-	Model::drawModel(dt);
+
 
 	static float accum = 0.f;
 	accum += dt;
@@ -606,6 +612,22 @@ void GLrender(float dt) {
 		accum = 0.f;
 
 	}
+
+
+	//RenderVars::Zoom(65.f + (glm::sin(accum)));
+	//RenderVars::MoveCameraZ(glm::cos(accum));
+
+
+	Axis::drawAxis();
+	Cube::drawCube(dt);
+	Model::drawModel(dt);
+
+	//static float accum = 0.f;
+	//accum += dt;
+	//if (accum > glm::two_pi<float>()) {
+	//	accum = 0.f;
+
+	//}
 
 
 	//glClearBufferfv(GL_COLOR, 0, col);
