@@ -401,7 +401,9 @@ void main() {\n\
 
 		//// Cube 2
 
-		
+		objMat = glm::translate(objMat, glm::vec3(1, 0, 2.5f));
+		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -539,7 +541,7 @@ in vec3 aNormal;\n\
 		glm::vec3 col(.3f, .5f, .2f);
 		glm::vec3 lightCol(1);
 		glm::vec3 lightPos(5,10,0);
-		glm::vec3 camPos(0,0,0);
+		glm::vec3 camPos(0,0,-10);
 
 		glUniform1f(glGetUniformLocation(program, "ambientValue"), GlobalVars::AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(program, "specularValue"), GlobalVars::SPECULAR_VALUE);
