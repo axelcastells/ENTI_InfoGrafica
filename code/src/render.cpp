@@ -23,6 +23,12 @@ namespace ResourcesManager {
 }
 #pragma endregion
 
+namespace GlobalVars {
+	static float SPECULAR_VALUE = .8f;
+	static float AMBIENT_VALUE = .2f;
+	static float DIFFUSE_VALUE = .3f;
+}
+
 ///////// fw decl
 namespace ImGui {
 	void Render();
@@ -418,26 +424,61 @@ namespace Model {
 	glm::mat4 objMat = glm::mat4(1.f);
 
 	const char* model_vertShader =
-		"#version 330\n\
-in vec3 in_Position;\n\
-in vec3 in_Normal;\n\
-out vec4 vert_Normal;\n\
-uniform mat4 objMat;\n\
-uniform mat4 mv_Mat;\n\
-uniform mat4 mvpMat;\n\
-void main() {\n\
-	gl_Position = mvpMat * objMat * vec4(in_Position, 1.0);\n\
-	vert_Normal = mv_Mat * objMat * vec4(in_Normal, 0.0);\n\
-}";
+"#version 330 core\n\
+in vec3 aPos;\n\
+in vec3 aNormal;\n\
+\n\
+	out vec3 FragPos;\n\
+	out vec3 Normal;\n\
+\n\
+	uniform mat4 model;\n\
+	//uniform mat4 view;\n\
+	uniform mat4 mvp;\n\
+\n\
+	void main()\n\
+	{\n\
+		FragPos = vec3(model * vec4(aPos, 1.0));\n\
+		Normal = mat3(transpose(inverse(model))) * aNormal;\n\
+		\n\
+		gl_Position = mvp * vec4(FragPos, 1.0);\n\
+	}\n\
+";
 	const char* model_fragShader =
-		"#version 330\n\
-in vec4 vert_Normal;\n\
-out vec4 out_Color;\n\
-uniform mat4 mv_Mat;\n\
-uniform vec4 color;\n\
-void main() {\n\
-	out_Color = vec4(color.xyz * dot(vert_Normal, mv_Mat*vec4(0.0, 1.0, 0.0, 0.0)) + color.xyz * 0.3, 1.0 );\n\
-}";
+		"#version 330 core\n\
+		out vec4 FragColor;\n\
+\n\
+	in vec3 Normal;\n\
+	in vec3 FragPos;\n\
+\n\
+	uniform float ambientValue;\n\
+	uniform float specularValue;\n\
+	uniform float diffuseValue;\n\
+		\n\
+	uniform vec3 lightPos;\n\
+	uniform vec3 viewPos;\n\
+	uniform vec3 lightColor;\n\
+	uniform vec3 objectColor;\n\
+\n\
+	void main()\n\
+	{\n\
+		// ambient\n\
+		vec3 ambient = ambientValue * lightColor;\n\
+\n\
+		// diffuse \n\
+		vec3 norm = normalize(Normal);\n\
+		vec3 lightDir = normalize(lightPos - FragPos);\n\
+		float diff = max(dot(norm, lightDir), 0.0);\n\
+		vec3 diffuse = diffuseValue * (diff * lightColor);\n\
+\n\
+		// specular\n\
+		vec3 viewDir = normalize(viewPos - FragPos);\n\
+		vec3 reflectDir = reflect(-lightDir, norm);\n\
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);\n\
+		vec3 specular = specularValue * spec * lightColor;\n\
+\n\
+		vec3 result = (ambient + diffuse + specular) * objectColor;\n\
+		FragColor = vec4(result, 1.0);\n\
+	} ";
 
 	void setupModel() {
 
@@ -470,8 +511,8 @@ void main() {\n\
 		program = glCreateProgram();
 		glAttachShader(program, shaders[0]);
 		glAttachShader(program, shaders[1]);
-		glBindAttribLocation(program, 0, "in_Position");
-		glBindAttribLocation(program, 1, "in_Normal");
+		glBindAttribLocation(program, 0, "aPos");
+		glBindAttribLocation(program, 1, "aNormal");
 		linkProgram(program);
 	}
 	void cleanupModel() {
@@ -489,29 +530,28 @@ void main() {\n\
 		glBindVertexArray(cubeVao);
 		glUseProgram(program);
 
-		// OBJ 1
-
 		glm::mat4 trans = glm::mat4(1.0f);
 		trans = glm::scale(trans, glm::vec3(0.005));
-		trans = glm::rotate<float>(trans, 0, glm::vec3(0, 1, 0));
 
 		updateModel(trans);
-		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniform4f(glGetUniformLocation(program, "color"), 0.1f, 1.f, 1.f, 0.f);
+		glUniformMatrix4fv(glGetUniformLocation(program, "model"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mvp"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+
+		glm::vec3 col(.3f, .5f, .2f);
+		glm::vec3 lightCol(1);
+		glm::vec3 lightPos(5,10,0);
+		glm::vec3 camPos(0,0,0);
+
+		glUniform1f(glGetUniformLocation(program, "ambientValue"), GlobalVars::AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(program, "specularValue"), GlobalVars::SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(program, "diffuseValue"), GlobalVars::DIFFUSE_VALUE);
+
+		glUniform3fv(glGetUniformLocation(program, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(program, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(program, "lightPos"), 1, glm::value_ptr(lightPos));
+		glUniform3fv(glGetUniformLocation(program, "viewPos"), 1, glm::value_ptr(camPos));
 
 		glDrawArrays(GL_TRIANGLES, 0, out_vertices.size());
-
-		// OBJ 2
-		//trans = glm::translate(trans, glm::vec3(0, 800, 0));
-		//updateModel(trans);
-
-		//glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-
-		//glDrawArrays(GL_TRIANGLES, 0, out_vertices.size());
-
-		//glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -519,23 +559,6 @@ void main() {\n\
 }
 
 /////////////////////////////////////////////////
-
-static const GLchar * vertext_shader_source =
-"#version 330\n\
-void main() {\n\
-	const vec4 vertices[3] = vec4[3](\n\
-		vec4(-0.25, -0.25, 0.5, 1.0),\n\
-		vec4(0.25, -0.25, 0.5, 1.0),\n\
-		vec4(0.25, 0.25, 0.5, 1.0));\n\
-	gl_Position = vertices[gl_VertexID];\n\
-}";
-
-static const GLchar * fragment_shader_source =
-"#version 330\n\
-out vec4 color;\n\
-void main() {\n\
-color = vec4(0.0,0.8,1.0,1.0);\n\
-}";
 
 GLuint vert_shader;
 GLuint frag_shader;
