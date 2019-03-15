@@ -205,6 +205,8 @@ void main() {\n\
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+
+
 		AxisShader[0] = compileShader(Axis_vertShader, GL_VERTEX_SHADER, "AxisVert");
 		AxisShader[1] = compileShader(Axis_fragShader, GL_FRAGMENT_SHADER, "AxisFrag");
 
@@ -382,6 +384,8 @@ void main() {\n\
 		};
 		// Cube 1
 
+		objMat = glm::translate(glm::mat4(1), glm::vec3(1, 0, 2.5f));
+
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
@@ -498,16 +502,14 @@ in vec3 aNormal;\n\
 		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(1);
 
-		//glPrimitiveRestartIndex(UCHAR_MAX);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVbo[2]);
-		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIdx), cubeIdx, GL_STATIC_DRAW);
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
 		shaders[0] = compileShader(model_vertShader, GL_VERTEX_SHADER, "model_vertShader");
 		shaders[1] = compileShader(model_fragShader, GL_FRAGMENT_SHADER, "model_fragShader");
+
 		program = glCreateProgram();
 		glAttachShader(program, shaders[0]);
 		glAttachShader(program, shaders[1]);
