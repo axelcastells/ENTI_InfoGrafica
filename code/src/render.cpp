@@ -27,6 +27,9 @@ namespace GlobalVars {
 	static float SPECULAR_VALUE = .8f;
 	static float AMBIENT_VALUE = .2f;
 	static float DIFFUSE_VALUE = .3f;
+
+	static int WIDTH;
+	static int HEIGHT;
 }
 
 ///////// fw decl
@@ -60,20 +63,12 @@ namespace RenderVars {
 	float panv[3] = { 0.f, -5.f, -15.f };
 	float rota[2] = { 0.f, 0.f };
 
-	void Zoom(float degrees) {
-		FOV = glm::radians(degrees);
-		_projection = glm::perspective(FOV, 1.f, zNear, zFar);
-	}
-
-	void MoveCameraZ(float distance) {
-		_projection = glm::translate(_projection, glm::vec3(0, 0, distance));// *_cameraPoint;
-		//_modelView = glm::translate()
-		//_projection = glm::translate()
-	}
 }
 namespace RV = RenderVars;
 
 void GLResize(int width, int height) {
+	GlobalVars::WIDTH = width;
+	GlobalVars::HEIGHT = height;
 	glViewport(0, 0, width, height);
 	if (height != 0) RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
 	else RV::_projection = glm::perspective(RV::FOV, 0.f, RV::zNear, RV::zFar);
@@ -394,17 +389,7 @@ void main() {\n\
 
 		//// Cube 2
 
-		//glm::mat4 cube2mat(1.0f);
-		////cube2mat = glm::translate(objMat, glm::vec3(0, col[0], 8));
-		//cube2mat = glm::scale(cube2mat, glm::vec3(1+col[0]));
-		//cube2mat = glm::rotate(cube2mat, accum, glm::vec3(0, 1, 0));
-
-		////cube2mat = glm::translate(cube2mat, vec)
-		//cube2mat = glm::translate(cube2mat, glm::vec3(glm::cos(accum*.10f) + 3, 0, glm::sin(accum*.10f) + 3));
-
-		//glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(cube2mat));
-		//glUniform4f(glGetUniformLocation(cubeProgram, "color"), col[0], 0.f, 0.f, 0.f);
-		//glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+		
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -486,7 +471,7 @@ in vec3 aNormal;\n\
 
 	void setupModel() {
 
-		ModelLoader::LoadOBJ("cube.obj", out_vertices, out_uvs, out_normals);
+		ModelLoader::LoadOBJ("deer.obj", out_vertices, out_uvs, out_normals);
 
 		glGenVertexArrays(1, &cubeVao);
 		glBindVertexArray(cubeVao);
@@ -575,6 +560,8 @@ void GLinit(int width, int height) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
+	GlobalVars::WIDTH = width;
+	GlobalVars::HEIGHT = height;
 	RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
 
 	// Setup shaders & geometry
@@ -627,48 +614,45 @@ void GLrender(float dt) {
 	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 
-	RV::_MVP = RV::_projection * RV::_modelView;
+
 
 
 
 	static float accum = 0.f;
-	accum += dt;
-	if (accum > glm::two_pi<float>()) {
-		accum = 0.f;
+	static float zoom = 0;
 
+	if (zoombutton) {
+
+		RV::_modelView = glm::mat4(1.f);
+		RV::_modelView = glm::translate(RV::_modelView, glm::vec3(2.0f - accum, -2.0f, -11.0f));
+		//RV::_modelView = glm::rotate(RV::_modelView, glm::radians(20.f), glm::vec3(1.f, 0.f, 0.f));
+	}
+		
+	if (FOVbutton) {
+		zoom = 0.0f + sinf((float)accum);
 	}
 
+	if (zoombutton || FOVbutton) {
+		accum += dt;
+		if (accum > glm::two_pi<float>()) {
+			accum = 0.f;
 
-	if(zoombutton)RenderVars::Zoom(65.f + (glm::sin(accum)*10));
-	if(FOVbutton)RenderVars::MoveCameraZ(glm::cos(accum));
+		}
 
+		RenderVars::FOV = 65.0f + sinf((float)accum) * 6.2f;
 
+		RV::_projection = glm::perspective(glm::radians(RV::FOV), (float)(GlobalVars::WIDTH / GlobalVars::HEIGHT), 1.0f, 50.0f);
+
+		glm::vec3 cameraPos = glm::vec3(0.0f, 3.0f, 10.0f - zoom);
+		RV::_modelView = glm::lookAt(cameraPos, glm::vec3(0), glm::vec3(0.0f, 1.0f, 0.0f));
+	}
+		
+
+	RV::_MVP = RV::_projection * RV::_modelView;
 	Axis::drawAxis();
 	Cube::drawCube(dt);
 	Model::drawModel(dt);
 
-	//static float accum = 0.f;
-	//accum += dt;
-	//if (accum > glm::two_pi<float>()) {
-	//	accum = 0.f;
-
-	//}
-
-
-	//glClearBufferfv(GL_COLOR, 0, col);
-
-
-	/////////////////////////////////////////////////////TODO
-	// Do your render code here
-	// ...
-	//Cube::drawCube();
-	//glUseProgram(program);
-	//glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-	//glBindVertexArray(vao_vert);
-	//glDrawArrays(GL_TRIANGLES, 0, 3);
-	// ...
-	// ...
-	/////////////////////////////////////////////////////////
 
 
 	ImGui::Render();
