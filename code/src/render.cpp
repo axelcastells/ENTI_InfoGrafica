@@ -405,6 +405,12 @@ void main() {\n\
 		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
 
+		//// Cube 3
+
+		objMat = glm::translate(glm::mat4(1), glm::vec3(-4, 0, -2.5f));
+		glUniformMatrix4fv(glGetUniformLocation(cubeProgram, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawElements(GL_TRIANGLE_STRIP, numVerts, GL_UNSIGNED_BYTE, 0);
+
 		glUseProgram(0);
 		glBindVertexArray(0);
 		glDisable(GL_PRIMITIVE_RESTART);
@@ -583,22 +589,6 @@ void GLinit(int width, int height) {
 	Cube::setupCube();
 	Model::setupModel();
 
-	/////////////////////////////////////////////////////TODO
-	// Do your init code here
-	// ...
-	//vert_shader = compileShader(vertext_shader_source, GL_VERTEX_SHADER, Cube::);
-	//frag_shader = compileShader(vertext_shader_source, GL_FRAGMENT_SHADER, cube_fragShader);
-	//program = glCreateProgram();
-	//glAttachShader(program, vert_shader);
-	//glAttachShader(program, frag_shader);
-	//linkProgram(program);
-
-	//glGenVertexArrays(1, &vao_vert);
-
-	//glPointSize(40.0f);
-	// ...
-	// ...
-	/////////////////////////////////////////////////////////
 }
 
 void GLcleanup() {
@@ -684,10 +674,6 @@ void GUI() {
 		ImGui::DragFloat("Diffuse", &GlobalVars::DIFFUSE_VALUE, 0.1f, MIN_DIFFUSE, MAX_DIFFUSE, "%.3f");
 		ImGui::DragFloat("Specular", &GlobalVars::SPECULAR_VALUE, 0.1f, MIN_SPECULAR, MAX_SPECULAR, "%.3f");
 
-		/////////////////////////////////////////////////////TODO
-		// Do your GUI code here....
-		// Light Parameters
-		//ImGui::DragFloat("Float",&f1,0.005f);
 
 		// Camera Movements
 		
