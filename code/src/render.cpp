@@ -14,6 +14,18 @@
 bool zoombutton;
 bool FOVbutton;
 
+//mínim i màxim del Ambient Light
+#define MIN_AMBIENT 0.0
+#define MAX_AMBIENT 1.0
+
+//mínim i màxim del Diffuse Light
+#define MIN_DIFFUSE 0.0
+#define MAX_DIFFUSE 1.0
+
+//mínim i màxim del Specular Light
+#define MIN_SPECULAR 0.0
+#define MAX_SPECULAR 1.0
+
 #pragma region Externs
 namespace ModelLoader {
 	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
@@ -665,6 +677,11 @@ void GUI() {
 	{
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		ImGui::Text("Lights");
+		ImGui::DragFloat("Ambient", &GlobalVars::AMBIENT_VALUE, 0.1f, MIN_AMBIENT, MAX_AMBIENT, "%.3f");
+		ImGui::DragFloat("Diffuse", &GlobalVars::DIFFUSE_VALUE, 0.1f, MIN_DIFFUSE, MAX_DIFFUSE, "%.3f");
+		ImGui::DragFloat("Specular", &GlobalVars::SPECULAR_VALUE, 0.1f, MIN_SPECULAR, MAX_SPECULAR, "%.3f");
+
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
 		// Light Parameters
@@ -682,7 +699,6 @@ void GUI() {
 		// ...
 		/////////////////////////////////////////////////////////
 
-		
 	}
 	// .........................
 
