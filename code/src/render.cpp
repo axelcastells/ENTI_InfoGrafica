@@ -6,8 +6,24 @@
 
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
+#include <vector>
 
 #include "GL_framework.h"
+
+namespace ResourcesManager {
+	extern std::string ReadFile(const char* filePath);
+}
+
+
+#define POINTS_COUNT 21
+
+#define SPACE_WIDTH 10
+#define SPACE_HEIGHT 10
+#define SPACE_DEPTH 10
+namespace GlobalVars {
+
+
+}
 
 ///////// fw decl
 namespace ImGui {
@@ -346,6 +362,70 @@ void drawCube() {
 }
 }
 
+namespace Points {
+	GLuint vao, vbo;
+	GLuint shaders[3];
+	GLuint program;
+	static glm::vec3 positions[POINTS_COUNT];
+	glm::mat4 objMat(1.f);
+
+	void setupPoints() {
+
+		for (int i = 0; i < POINTS_COUNT; i++) {
+			Points::positions[i] = { rand() % SPACE_WIDTH - SPACE_WIDTH/2, 
+									rand() % SPACE_HEIGHT, 
+									rand() %  SPACE_DEPTH - SPACE_DEPTH/2 };
+		}
+
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(1, &vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		shaders[0] = compileShader(ResourcesManager::ReadFile(".\\vertexShader").c_str(), GL_VERTEX_SHADER);
+		shaders[1] = compileShader(ResourcesManager::ReadFile(".\\geometryShader").c_str(), GL_GEOMETRY_SHADER);
+		shaders[2] = compileShader(ResourcesManager::ReadFile(".\\fragmentShader").c_str(), GL_FRAGMENT_SHADER);
+
+		program = glCreateProgram();
+		glAttachShader(program, shaders[0]);
+		glAttachShader(program, shaders[1]);
+		glAttachShader(program, shaders[2]);
+		
+		glBindAttribLocation(program, 0, "in_Position");
+		//glBindAttribLocation(program, 1, "in_Color");
+		
+		linkProgram(program);
+
+
+	}
+
+	void updatePoints() {
+		for (int i = 0; i < POINTS_COUNT; i++) {
+
+		}
+	}
+
+	void drawPoints() {
+		glBindVertexArray(vao);
+		glUseProgram(program);
+		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glPointSize(10);
+		glDrawArrays(GL_POINTS, 0, POINTS_COUNT);
+
+		//for (int i = 0; i < POINTS_COUNT; i++) {
+		//	
+		//}
+	}
+}
+
 /////////////////////////////////////////////////
 
 
@@ -359,7 +439,10 @@ void GLinit(int width, int height) {
 
 	RV::_projection = glm::perspective(RV::FOV, (float)width / (float)height, RV::zNear, RV::zFar);
 
+
+
 	// Setup shaders & geometry
+	Points::setupPoints();
 	Axis::setupAxis();
 	Cube::setupCube();
 
@@ -373,6 +456,7 @@ void GLinit(int width, int height) {
 }
 
 void GLcleanup() {
+	
 	Axis::cleanupAxis();
 	Cube::cleanupCube();
 
@@ -394,6 +478,8 @@ void GLrender(float dt) {
 
 	RV::_MVP = RV::_projection * RV::_modelView;
 
+
+	Points::drawPoints();
 	Axis::drawAxis();
 	Cube::drawCube();
 	/////////////////////////////////////////////////////TODO
