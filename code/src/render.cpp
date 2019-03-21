@@ -7,6 +7,7 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
 #include <vector>
+#include <iostream>
 
 #include "GL_framework.h"
 
@@ -15,7 +16,7 @@ namespace ResourcesManager {
 }
 
 
-#define POINTS_COUNT 21
+#define POINTS_COUNT 1
 
 #define SPACE_WIDTH 10
 #define SPACE_HEIGHT 10
@@ -414,10 +415,11 @@ namespace Points {
 		glBindVertexArray(vao);
 		glUseProgram(program);
 		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		//glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		glPointSize(10);
+		glPointSize(5);
 		glDrawArrays(GL_POINTS, 0, POINTS_COUNT);
 
 		//for (int i = 0; i < POINTS_COUNT; i++) {
@@ -477,7 +479,6 @@ void GLrender(float dt) {
 	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 
 	RV::_MVP = RV::_projection * RV::_modelView;
-
 
 	Points::drawPoints();
 	Axis::drawAxis();

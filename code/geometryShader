@@ -1,12 +1,42 @@
 #version 330 core
 layout (points) in;
-layout (points, max_vertices = 1) out;
+layout (triangle_strip, max_vertices = 5) out;
+
+uniform mat4 mvpMat;
+
+float base_length = 1;
+float lateral_length = 1.5;
+float height = 0;
+float slant_height = 0;
+
+
+vec4 triangles[12];
+vec4 baseVertices[4];
+vec4 topVertex;
+vec4 botVertex;
 
 void main() {   
-	gl_Position = gl_in[0].gl_Position;
-	EmitVertex();
-    gl_Position = gl_in[0].gl_Position + vec4(1,0,0,0); 
-    EmitVertex();
+	height = (sqrt(2)/2) * base_length;
+	slant_height = (sqrt(3)/2) * base_length;
 
-    EndPrimitive();
-} 
+	float dist_to_base_point = sqrt(lateral_length*lateral_length - height*height);
+
+
+	baseVertices[0] = gl_in[0].gl_Position + vec4(dist_to_base_point,0,0,0);
+	baseVertices[1] = gl_in[0].gl_Position + vec4(-dist_to_base_point,0,0,0);
+	baseVertices[2] = gl_in[0].gl_Position + vec4(0,0,dist_to_base_point,0);
+	baseVertices[3] = gl_in[0].gl_Position + vec4(0,0,-dist_to_base_point,0);
+	
+	topVertex = gl_in[0].gl_Position + vec4(0,height,0,0);
+	botVertex = gl_in[0].gl_Position + vec4(0,-height,0,0);
+	
+
+
+	gl_Position = mvpMat* triangles[0];	
+    EmitVertex();
+	gl_Position = mvpMat* triangles[1];
+    EmitVertex();
+    gl_Position = mvpMat* triangles[2];
+    EmitVertex();
+	EndPrimitive();
+}
