@@ -112,74 +112,77 @@ void main() {
 	indexedPoints[22] = baseTruncatedVertices[22];
 	indexedPoints[23] = baseTruncatedVertices[20];
 
+	// 4-3-5-2-0-1 ORDRE PUNTS
 	// Hexagon 0 Top-Left-Front
-	indexedPoints[24] = baseTruncatedVertices[0];
-	indexedPoints[25] = baseTruncatedVertices[0];
-	indexedPoints[26] = baseTruncatedVertices[0];
-	indexedPoints[27] = baseTruncatedVertices[0];
-	indexedPoints[28] = baseTruncatedVertices[0];
-	indexedPoints[29] = baseTruncatedVertices[0];
+	indexedPoints[24] = baseTruncatedVertices[10];
+	indexedPoints[25] = baseTruncatedVertices[18];
+	indexedPoints[26] = baseTruncatedVertices[9];
+	indexedPoints[27] = baseTruncatedVertices[17];
+	indexedPoints[28] = baseTruncatedVertices[4];
+	indexedPoints[29] = baseTruncatedVertices[6];
 
 	// Hexagon 1 Top-Right-Front
-	indexedPoints[30] = baseTruncatedVertices[0];
-	indexedPoints[31] = baseTruncatedVertices[0];
+	indexedPoints[30] = baseTruncatedVertices[2];
+	indexedPoints[31] = baseTruncatedVertices[16];
 	indexedPoints[32] = baseTruncatedVertices[0];
-	indexedPoints[33] = baseTruncatedVertices[0];
-	indexedPoints[34] = baseTruncatedVertices[0];
-	indexedPoints[35] = baseTruncatedVertices[0];
+	indexedPoints[33] = baseTruncatedVertices[18];
+	indexedPoints[34] = baseTruncatedVertices[8];
+	indexedPoints[35] = baseTruncatedVertices[10];
 
 	// Hexagon 2 Top-Left-Back
-	indexedPoints[36] = baseTruncatedVertices[0];
-	indexedPoints[37] = baseTruncatedVertices[0];
-	indexedPoints[38] = baseTruncatedVertices[0];
-	indexedPoints[39] = baseTruncatedVertices[0];
-	indexedPoints[40] = baseTruncatedVertices[0];
-	indexedPoints[41] = baseTruncatedVertices[0];
+	indexedPoints[36] = baseTruncatedVertices[6];
+	indexedPoints[37] = baseTruncatedVertices[17];
+	indexedPoints[38] = baseTruncatedVertices[5];
+	indexedPoints[39] = baseTruncatedVertices[19];
+	indexedPoints[40] = baseTruncatedVertices[13];
+	indexedPoints[41] = baseTruncatedVertices[14];
 
 	// Hexagon 3 Top-Right-Back
-	indexedPoints[42] = baseTruncatedVertices[0];
-	indexedPoints[43] = baseTruncatedVertices[0];
-	indexedPoints[44] = baseTruncatedVertices[0];
-	indexedPoints[45] = baseTruncatedVertices[0];
-	indexedPoints[46] = baseTruncatedVertices[0];
-	indexedPoints[47] = baseTruncatedVertices[0];
+	indexedPoints[42] = baseTruncatedVertices[14];
+	indexedPoints[43] = baseTruncatedVertices[19];
+	indexedPoints[44] = baseTruncatedVertices[12];
+	indexedPoints[45] = baseTruncatedVertices[16];
+	indexedPoints[46] = baseTruncatedVertices[1];
+	indexedPoints[47] = baseTruncatedVertices[2];
 
 	// Hexagon 4 Bot-Left-Front
-	indexedPoints[48] = baseTruncatedVertices[0];
-	indexedPoints[49] = baseTruncatedVertices[0];
-	indexedPoints[50] = baseTruncatedVertices[0];
-	indexedPoints[51] = baseTruncatedVertices[0];
-	indexedPoints[52] = baseTruncatedVertices[0];
-	indexedPoints[53] = baseTruncatedVertices[0];
+	indexedPoints[48] = baseTruncatedVertices[11];
+	indexedPoints[49] = baseTruncatedVertices[9];
+	indexedPoints[50] = baseTruncatedVertices[22];
+	indexedPoints[51] = baseTruncatedVertices[4];
+	indexedPoints[52] = baseTruncatedVertices[21];
+	indexedPoints[53] = baseTruncatedVertices[7];
 
 	// Hexagon 5 Bot-Right-Front
-	indexedPoints[54] = baseTruncatedVertices[0];
+	indexedPoints[54] = baseTruncatedVertices[3];
 	indexedPoints[55] = baseTruncatedVertices[0];
-	indexedPoints[56] = baseTruncatedVertices[0];
-	indexedPoints[57] = baseTruncatedVertices[0];
-	indexedPoints[58] = baseTruncatedVertices[0];
-	indexedPoints[59] = baseTruncatedVertices[0];
+	indexedPoints[56] = baseTruncatedVertices[20];
+	indexedPoints[57] = baseTruncatedVertices[8];
+	indexedPoints[58] = baseTruncatedVertices[22];
+	indexedPoints[59] = baseTruncatedVertices[11];
 
 	// Hexagon 6 Bot-Left-Back
-	indexedPoints[60] = baseTruncatedVertices[0];
-	indexedPoints[61] = baseTruncatedVertices[0];
-	indexedPoints[62] = baseTruncatedVertices[0];
-	indexedPoints[63] = baseTruncatedVertices[0];
-	indexedPoints[64] = baseTruncatedVertices[0];
-	indexedPoints[65] = baseTruncatedVertices[0];
+	indexedPoints[60] = baseTruncatedVertices[7];
+	indexedPoints[61] = baseTruncatedVertices[5];
+	indexedPoints[62] = baseTruncatedVertices[21];
+	indexedPoints[63] = baseTruncatedVertices[13];
+	indexedPoints[64] = baseTruncatedVertices[23];
+	indexedPoints[65] = baseTruncatedVertices[15];
 	
 	// Hexagon 7 Bot-Right-Back
-	indexedPoints[66] = baseTruncatedVertices[0];
-	indexedPoints[67] = baseTruncatedVertices[0];
-	indexedPoints[68] = baseTruncatedVertices[0];
-	indexedPoints[69] = baseTruncatedVertices[0];
-	indexedPoints[70] = baseTruncatedVertices[0];
-	indexedPoints[71] = baseTruncatedVertices[0];
+	indexedPoints[66] = baseTruncatedVertices[15];
+	indexedPoints[67] = baseTruncatedVertices[12];
+	indexedPoints[68] = baseTruncatedVertices[23];
+	indexedPoints[69] = baseTruncatedVertices[1];
+	indexedPoints[70] = baseTruncatedVertices[20];
+	indexedPoints[71] = baseTruncatedVertices[3];
 
 	// RENDER
 
 	// Indices
-	// Tapa 0
+
+	// Tapa 0 - RIGHT
+	
 	gl_Position = mvpMat * indexedPoints[0];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[1];
@@ -189,7 +192,9 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[3];
 	EmitVertex();
 	EndPrimitive();	
-	// Tapa 1
+	
+
+	// Tapa 1 - LEFT
 	gl_Position = mvpMat * indexedPoints[4];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[5];
@@ -199,7 +204,9 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[7];
 	EmitVertex();
 	EndPrimitive();	
-	// Tapa 2
+
+	// Tapa 2 - FRONT
+	
 	gl_Position = mvpMat * indexedPoints[8];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[9];
@@ -209,6 +216,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[11];
 	EmitVertex();
 	EndPrimitive();	
+	
 	// Tapa 3
 	gl_Position = mvpMat * indexedPoints[12];
 	EmitVertex();
