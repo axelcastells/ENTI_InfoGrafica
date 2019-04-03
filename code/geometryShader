@@ -1,19 +1,22 @@
 #version 330 core
 layout (points) in;
-layout (triangle_strip, max_vertices = 5) out;
+layout (points, max_vertices = 64) out;
 
 uniform mat4 mvpMat;
 
 float base_length = 1;
-float lateral_length = 1.5;
-float height = 0;
-float slant_height = 0;
+float lateral_length = 1;
+
+float height;
+float slant_height;
 
 
-vec4 triangles[12];
 vec4 baseVertices[4];
+vec4 baseTruncatedVertices[24];
 vec4 topVertex;
 vec4 botVertex;
+
+vec4 indexedPoints[24];
 
 void main() {   
 	height = (sqrt(2)/2) * base_length;
@@ -21,22 +24,181 @@ void main() {
 
 	float dist_to_base_point = sqrt(lateral_length*lateral_length - height*height);
 
+	// Top and Bottom Points
+	topVertex = gl_in[0].gl_Position + vec4(0,height,0,0);
+	botVertex = gl_in[0].gl_Position + vec4(0,-height,0,0);
 
+	// Base Points
 	baseVertices[0] = gl_in[0].gl_Position + vec4(dist_to_base_point,0,0,0);
 	baseVertices[1] = gl_in[0].gl_Position + vec4(-dist_to_base_point,0,0,0);
 	baseVertices[2] = gl_in[0].gl_Position + vec4(0,0,dist_to_base_point,0);
 	baseVertices[3] = gl_in[0].gl_Position + vec4(0,0,-dist_to_base_point,0);
 	
-	topVertex = gl_in[0].gl_Position + vec4(0,height,0,0);
-	botVertex = gl_in[0].gl_Position + vec4(0,-height,0,0);
+	// Truncations
+	// From Base 0
+	baseTruncatedVertices[0] = baseVertices[0] + (normalize(baseVertices[2] - baseVertices[0]) * (base_length / 3));
+	baseTruncatedVertices[1] = baseVertices[0] + (normalize(baseVertices[3] - baseVertices[0]) * (base_length / 3));	
+	baseTruncatedVertices[2] = baseVertices[0] + (normalize(topVertex - baseVertices[0]) * (lateral_length / 3));
+	baseTruncatedVertices[3] = baseVertices[0] + (normalize(botVertex - baseVertices[0]) * (lateral_length / 3));	
+																												
+	// From Base 1																								
+	baseTruncatedVertices[4] = baseVertices[1] + (normalize(baseVertices[2] - baseVertices[1]) * (base_length / 3));
+	baseTruncatedVertices[5] = baseVertices[1] + (normalize(baseVertices[3] - baseVertices[1]) * (base_length / 3));	
+	baseTruncatedVertices[6] = baseVertices[1] + (normalize(topVertex - baseVertices[1]) * (lateral_length / 3));
+	baseTruncatedVertices[7] = baseVertices[1] + (normalize(botVertex - baseVertices[1]) * (lateral_length / 3));	
+																												
+	// From Base 2																								
+	baseTruncatedVertices[8] = baseVertices[2] + (normalize(baseVertices[0] - baseVertices[2]) * (base_length / 3));
+	baseTruncatedVertices[9] = baseVertices[2] + (normalize(baseVertices[1] - baseVertices[2]) * (base_length / 3));
+	baseTruncatedVertices[10] = baseVertices[2] + (normalize(topVertex - baseVertices[2]) * (lateral_length / 3));
+	baseTruncatedVertices[11] = baseVertices[2] + (normalize(botVertex - baseVertices[2]) * (lateral_length / 3));	
+																												
+	// From Base 3																								
+	baseTruncatedVertices[12] = baseVertices[3] + (normalize(baseVertices[0] - baseVertices[3]) * (base_length / 3));
+	baseTruncatedVertices[13] = baseVertices[3] + (normalize(baseVertices[1] - baseVertices[3]) * (base_length / 3));
+	baseTruncatedVertices[14] = baseVertices[3] + (normalize(topVertex - baseVertices[3]) * (lateral_length / 3));
+	baseTruncatedVertices[15] = baseVertices[3] + (normalize(botVertex - baseVertices[3]) * (lateral_length / 3));	
+
+	// From Top
+	baseTruncatedVertices[16] = topVertex + (normalize(baseVertices[0] - topVertex) * (lateral_length / 3));
+	baseTruncatedVertices[17] = topVertex + (normalize(baseVertices[1] - topVertex) * (lateral_length / 3));
+	baseTruncatedVertices[18] = topVertex + (normalize(baseVertices[2] - topVertex) * (lateral_length / 3));
+	baseTruncatedVertices[19] = topVertex + (normalize(baseVertices[3] - topVertex) * (lateral_length / 3));
+
+	// From Bottom
+	baseTruncatedVertices[20] = botVertex + (normalize(baseVertices[0] - botVertex) * (lateral_length / 3));
+	baseTruncatedVertices[21] = botVertex + (normalize(baseVertices[1] - botVertex) * (lateral_length / 3));
+	baseTruncatedVertices[22] = botVertex + (normalize(baseVertices[2] - botVertex) * (lateral_length / 3));
+	baseTruncatedVertices[23] = botVertex + (normalize(baseVertices[3] - botVertex) * (lateral_length / 3));
 	
 
+	// INDEXING
+	indexedPoints[0] = baseTruncatedVertices[0];
+	indexedPoints[1] = baseTruncatedVertices[0];
+	indexedPoints[2] = baseTruncatedVertices[0];
+	indexedPoints[3] = baseTruncatedVertices[0];
+	indexedPoints[4] = baseTruncatedVertices[0];
+	indexedPoints[5] = baseTruncatedVertices[0];
+	indexedPoints[6] = baseTruncatedVertices[0];
+	indexedPoints[7] = baseTruncatedVertices[0];
+	indexedPoints[8] = baseTruncatedVertices[0];
+	indexedPoints[9] = baseTruncatedVertices[0];
+	indexedPoints[10] = baseTruncatedVertices[0];
+	indexedPoints[11] = baseTruncatedVertices[0];
+	indexedPoints[12] = baseTruncatedVertices[0];
+	indexedPoints[13] = baseTruncatedVertices[0];
+	indexedPoints[14] = baseTruncatedVertices[0];
+	indexedPoints[15] = baseTruncatedVertices[0];
+	indexedPoints[16] = baseTruncatedVertices[0];
+	indexedPoints[17] = baseTruncatedVertices[0];
+	indexedPoints[18] = baseTruncatedVertices[0];
+	indexedPoints[19] = baseTruncatedVertices[0];
+	indexedPoints[20] = baseTruncatedVertices[0];
+	indexedPoints[21] = baseTruncatedVertices[0];
+	indexedPoints[22] = baseTruncatedVertices[0];
+	indexedPoints[23] = baseTruncatedVertices[0];
 
-	gl_Position = mvpMat* triangles[0];	
-    EmitVertex();
-	gl_Position = mvpMat* triangles[1];
-    EmitVertex();
-    gl_Position = mvpMat* triangles[2];
-    EmitVertex();
+
+
+	// RENDER
+	// Top & Bottom
+	/*
+	gl_Position = mvpMat * topVertex;
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * botVertex;
+	EmitVertex();
 	EndPrimitive();
+	*/
+
+	// Base
+	/*
+	gl_Position = mvpMat * baseVertices[0];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[1];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[2];
+	EmitVertex();	
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[3];
+	EmitVertex();
+	EndPrimitive();
+	*/
+
+	// Truncated
+	gl_Position = mvpMat * baseTruncatedVertices[0];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[1];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[2];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[3];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[4];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[5];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[6];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[7];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[8];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[9];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[10];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[11];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[12];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[13];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[14];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[15];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[16];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[17];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[18];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[19];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[20];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[21];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[22];
+	EmitVertex();
+	EndPrimitive();	
+	gl_Position = mvpMat * baseTruncatedVertices[23];
+	EmitVertex();
+	EndPrimitive();
+
 }

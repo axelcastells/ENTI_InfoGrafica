@@ -373,9 +373,10 @@ namespace Points {
 	void setupPoints() {
 
 		for (int i = 0; i < POINTS_COUNT; i++) {
-			Points::positions[i] = { rand() % SPACE_WIDTH - SPACE_WIDTH/2, 
-									rand() % SPACE_HEIGHT, 
-									rand() %  SPACE_DEPTH - SPACE_DEPTH/2 };
+			Points::positions[i] = glm::vec3(0);
+			//Points::positions[i] = { rand() % SPACE_WIDTH - SPACE_WIDTH/2, 
+			//						rand() % SPACE_HEIGHT, 
+			//						rand() %  SPACE_DEPTH - SPACE_DEPTH/2 };
 		}
 
 
@@ -482,7 +483,7 @@ void GLrender(float dt) {
 
 	Points::drawPoints();
 	Axis::drawAxis();
-	Cube::drawCube();
+	//Cube::drawCube();
 	/////////////////////////////////////////////////////TODO
 	// Do your render code here
 	// ...
