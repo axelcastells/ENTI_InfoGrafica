@@ -1,6 +1,6 @@
 #version 330 core
 layout (points) in;
-layout (triangle_strip, max_vertices = 64) out;
+layout (triangle_strip, max_vertices = 72) out;
 
 uniform mat4 mvpMat;
 
@@ -15,12 +15,11 @@ vec4 baseTruncatedVertices[24];
 vec4 topVertex;
 vec4 botVertex;
 
-vec4 indexedPoints[24];
+vec4 indexedPoints[72];
 
 void main() {   
 	height = (sqrt(2)/2) * length;
 	slant_height = (sqrt(3)/2) * length;
-
 	float dist_to_base_point = sqrt(length*length - height*height);
 
 	// Top and Bottom Points
@@ -72,41 +71,97 @@ void main() {
 	
 
 	// INDEXING
+	// Tapa 0
 	indexedPoints[0] = baseTruncatedVertices[1];
 	indexedPoints[1] = baseTruncatedVertices[2];
 	indexedPoints[2] = baseTruncatedVertices[3];
 	indexedPoints[3] = baseTruncatedVertices[0];
-
+	// Tapa 1
 	indexedPoints[4] = baseTruncatedVertices[5];
 	indexedPoints[5] = baseTruncatedVertices[7];
 	indexedPoints[6] = baseTruncatedVertices[6];
 	indexedPoints[7] = baseTruncatedVertices[4];
-
+	// Tapa 2
 	indexedPoints[8] = baseTruncatedVertices[9];
 	indexedPoints[9] = baseTruncatedVertices[11];
 	indexedPoints[10] = baseTruncatedVertices[10];
 	indexedPoints[11] = baseTruncatedVertices[8];
-
+	// Tapa 3
 	indexedPoints[12] = baseTruncatedVertices[13];
 	indexedPoints[13] = baseTruncatedVertices[14];
 	indexedPoints[14] = baseTruncatedVertices[15];
 	indexedPoints[15] = baseTruncatedVertices[12];
-
+	// Tapa 4
 	indexedPoints[16] = baseTruncatedVertices[17];
 	indexedPoints[17] = baseTruncatedVertices[18];
 	indexedPoints[18] = baseTruncatedVertices[19];
 	indexedPoints[19] = baseTruncatedVertices[16];
-
+	// Tapa 5
 	indexedPoints[20] = baseTruncatedVertices[21];
 	indexedPoints[21] = baseTruncatedVertices[23];
 	indexedPoints[22] = baseTruncatedVertices[22];
 	indexedPoints[23] = baseTruncatedVertices[20];
-
-
+	// Hexagon 0
+	indexedPoints[24] = baseTruncatedVertices[0];
+	indexedPoints[25] = baseTruncatedVertices[0];
+	indexedPoints[26] = baseTruncatedVertices[0];
+	indexedPoints[27] = baseTruncatedVertices[0];
+	indexedPoints[28] = baseTruncatedVertices[0];
+	indexedPoints[29] = baseTruncatedVertices[0];
+	// Hexagon 1
+	indexedPoints[30] = baseTruncatedVertices[0];
+	indexedPoints[31] = baseTruncatedVertices[0];
+	indexedPoints[32] = baseTruncatedVertices[0];
+	indexedPoints[33] = baseTruncatedVertices[0];
+	indexedPoints[34] = baseTruncatedVertices[0];
+	indexedPoints[35] = baseTruncatedVertices[0];
+	// Hexagon 2
+	indexedPoints[36] = baseTruncatedVertices[0];
+	indexedPoints[37] = baseTruncatedVertices[0];
+	indexedPoints[38] = baseTruncatedVertices[0];
+	indexedPoints[39] = baseTruncatedVertices[0];
+	indexedPoints[40] = baseTruncatedVertices[0];
+	indexedPoints[41] = baseTruncatedVertices[0];
+	// Hexagon 3
+	indexedPoints[42] = baseTruncatedVertices[0];
+	indexedPoints[43] = baseTruncatedVertices[0];
+	indexedPoints[44] = baseTruncatedVertices[0];
+	indexedPoints[45] = baseTruncatedVertices[0];
+	indexedPoints[46] = baseTruncatedVertices[0];
+	indexedPoints[47] = baseTruncatedVertices[0];
+	// Hexagon 4
+	indexedPoints[48] = baseTruncatedVertices[0];
+	indexedPoints[49] = baseTruncatedVertices[0];
+	indexedPoints[50] = baseTruncatedVertices[0];
+	indexedPoints[51] = baseTruncatedVertices[0];
+	indexedPoints[52] = baseTruncatedVertices[0];
+	indexedPoints[53] = baseTruncatedVertices[0];
+	// Hexagon 5
+	indexedPoints[54] = baseTruncatedVertices[0];
+	indexedPoints[55] = baseTruncatedVertices[0];
+	indexedPoints[56] = baseTruncatedVertices[0];
+	indexedPoints[57] = baseTruncatedVertices[0];
+	indexedPoints[58] = baseTruncatedVertices[0];
+	indexedPoints[59] = baseTruncatedVertices[0];
+	// Hexagon 6
+	indexedPoints[60] = baseTruncatedVertices[0];
+	indexedPoints[61] = baseTruncatedVertices[0];
+	indexedPoints[62] = baseTruncatedVertices[0];
+	indexedPoints[63] = baseTruncatedVertices[0];
+	indexedPoints[64] = baseTruncatedVertices[0];
+	indexedPoints[65] = baseTruncatedVertices[0];
+	// Hexagon 7
+	indexedPoints[66] = baseTruncatedVertices[0];
+	indexedPoints[67] = baseTruncatedVertices[0];
+	indexedPoints[68] = baseTruncatedVertices[0];
+	indexedPoints[69] = baseTruncatedVertices[0];
+	indexedPoints[70] = baseTruncatedVertices[0];
+	indexedPoints[71] = baseTruncatedVertices[0];
 
 	// RENDER
 
 	// Indices
+	// Tapa 0
 	gl_Position = mvpMat * indexedPoints[0];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[1];
@@ -116,7 +171,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[3];
 	EmitVertex();
 	EndPrimitive();	
-
+	// Tapa 1
 	gl_Position = mvpMat * indexedPoints[4];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[5];
@@ -126,7 +181,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[7];
 	EmitVertex();
 	EndPrimitive();	
-
+	// Tapa 2
 	gl_Position = mvpMat * indexedPoints[8];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[9];
@@ -136,7 +191,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[11];
 	EmitVertex();
 	EndPrimitive();	
-
+	// Tapa 3
 	gl_Position = mvpMat * indexedPoints[12];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[13];
@@ -146,7 +201,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[15];
 	EmitVertex();
 	EndPrimitive();	
-
+	// Tapa 4
 	gl_Position = mvpMat * indexedPoints[16];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[17];
@@ -156,7 +211,7 @@ void main() {
 	gl_Position = mvpMat * indexedPoints[19];
 	EmitVertex();
 	EndPrimitive();	
-
+	// Tapa 5
 	gl_Position = mvpMat * indexedPoints[20];
 	EmitVertex();
 	gl_Position = mvpMat * indexedPoints[21];
@@ -167,4 +222,123 @@ void main() {
 	EmitVertex();
 	EndPrimitive();
 
+	// Hexagon 0
+	gl_Position = mvpMat * indexedPoints[24];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[25];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[26];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[27];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[28];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[29];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 1
+	gl_Position = mvpMat * indexedPoints[30];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[31];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[32];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[33];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[34];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[35];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 2
+	gl_Position = mvpMat * indexedPoints[36];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[37];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[38];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[39];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[40];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[41];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 3
+	gl_Position = mvpMat * indexedPoints[42];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[43];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[44];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[45];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[46];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[47];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 4
+	gl_Position = mvpMat * indexedPoints[48];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[49];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[50];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[51];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[52];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[53];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 5
+	gl_Position = mvpMat * indexedPoints[54];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[55];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[56];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[57];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[58];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[59];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 6
+	gl_Position = mvpMat * indexedPoints[60];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[61];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[62];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[63];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[64];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[65];
+	EmitVertex();
+	EndPrimitive();
+
+	// Hexagon 7
+	gl_Position = mvpMat * indexedPoints[66];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[67];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[68];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[69];
+	EmitVertex();	
+	gl_Position = mvpMat * indexedPoints[70];
+	EmitVertex();
+	gl_Position = mvpMat * indexedPoints[71];
+	EmitVertex();
+	EndPrimitive();
 }
