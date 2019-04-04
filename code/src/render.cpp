@@ -10,11 +10,15 @@
 #include <iostream>
 
 #include "GL_framework.h"
+#include "Texture.h"
 
 namespace ResourcesManager {
 	extern std::string ReadFile(const char* filePath);
 }
+float Random(float min, float max) {
 
+	return min + (rand() - 0) * (max - min) / (RAND_MAX - 0);
+}
 
 #define POINTS_COUNT 1
 
@@ -370,6 +374,8 @@ namespace Points {
 	static glm::vec3 positions[POINTS_COUNT];
 	glm::mat4 objMat(1.f);
 
+	int randomizer;
+
 	void setupPoints() {
 
 		for (int i = 0; i < POINTS_COUNT; i++) {
@@ -408,28 +414,46 @@ namespace Points {
 
 	void updatePoints() {
 		for (int i = 0; i < POINTS_COUNT; i++) {
-
+			
+			//srand(randomizer+i);
+			float speed = Random(0, 5.f);
+			float dirX = Random(-1, 1);
+			float dirY = Random(-1, 1);
+			float dirZ = Random(-1, 1);
+			glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
+			
+			std::cout << "RAND: " << rand() * .00001f << std::endl;
+			positions[i] += dir * speed;
+			
+			// CLAMP
+			positions[i].x = glm::clamp(positions[i].x, (float)-(SPACE_WIDTH / 2), (float)SPACE_WIDTH / 2);
+			positions[i].y = glm::clamp(positions[i].y, .0f, (float)SPACE_WIDTH);
+			positions[i].z = glm::clamp(positions[i].z, (float)-(SPACE_DEPTH / 2), (float)SPACE_DEPTH / 2);
 		}
+		randomizer++;
 	}
 
 	void drawPoints() {
-		glBindVertexArray(vao);
-		glUseProgram(program);
-		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		//glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+			glBindVertexArray(vao);
+			glUseProgram(program);
+			glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 
-		glPointSize(5);
-		glDrawArrays(GL_POINTS, 0, POINTS_COUNT);
+			glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		//for (int i = 0; i < POINTS_COUNT; i++) {
-		//	
-		//}
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			for (int i = 0; i < POINTS_COUNT; i++) {
+
+				objMat = glm::translate(glm::mat4(1), positions[i]);
+				glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+				glDrawArrays(GL_POINTS, i, 1);
+			}
+
 	}
 }
 
 /////////////////////////////////////////////////
+
 
 
 void GLinit(int width, int height) {
@@ -448,6 +472,7 @@ void GLinit(int width, int height) {
 	Points::setupPoints();
 	Axis::setupAxis();
 	Cube::setupCube();
+	
 
 
 	/////////////////////////////////////////////////////TODO
@@ -481,6 +506,7 @@ void GLrender(float dt) {
 
 	RV::_MVP = RV::_projection * RV::_modelView;
 
+	//Points::updatePoints();
 	Points::drawPoints();
 	Axis::drawAxis();
 	//Cube::drawCube();

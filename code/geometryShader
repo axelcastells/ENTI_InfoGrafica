@@ -5,6 +5,7 @@ layout (triangle_strip, max_vertices = 72) out;
 uniform mat4 mvpMat;
 
 float length = 3;
+float mutationFactor = 0.333333;
 
 float height;
 float slant_height;
@@ -38,40 +39,40 @@ void main() {
 	
 	// Truncations
 	// From Base Right
-	baseTruncatedVertices[0] = baseVertices[0] + (normalize(baseVertices[2] - baseVertices[0]) * (length / 3));
-	baseTruncatedVertices[1] = baseVertices[0] + (normalize(baseVertices[3] - baseVertices[0]) * (length / 3));	
-	baseTruncatedVertices[2] = baseVertices[0] + (normalize(topVertex - baseVertices[0]) * (length / 3));
-	baseTruncatedVertices[3] = baseVertices[0] + (normalize(botVertex - baseVertices[0]) * (length / 3));	
+	baseTruncatedVertices[0] = baseVertices[0] + (normalize(baseVertices[2] - baseVertices[0]) * (length * mutationFactor));
+	baseTruncatedVertices[1] = baseVertices[0] + (normalize(baseVertices[3] - baseVertices[0]) * (length * mutationFactor));	
+	baseTruncatedVertices[2] = baseVertices[0] + (normalize(topVertex - baseVertices[0]) * (length * mutationFactor));
+	baseTruncatedVertices[3] = baseVertices[0] + (normalize(botVertex - baseVertices[0]) * (length * mutationFactor));	
 																												
 	// From Base Left																								
-	baseTruncatedVertices[4] = baseVertices[1] + (normalize(baseVertices[2] - baseVertices[1]) * (length / 3));
-	baseTruncatedVertices[5] = baseVertices[1] + (normalize(baseVertices[3] - baseVertices[1]) * (length / 3));	
-	baseTruncatedVertices[6] = baseVertices[1] + (normalize(topVertex - baseVertices[1]) * (length / 3));
-	baseTruncatedVertices[7] = baseVertices[1] + (normalize(botVertex - baseVertices[1]) * (length / 3));	
+	baseTruncatedVertices[4] = baseVertices[1] + (normalize(baseVertices[2] - baseVertices[1]) * (length * mutationFactor));
+	baseTruncatedVertices[5] = baseVertices[1] + (normalize(baseVertices[3] - baseVertices[1]) * (length * mutationFactor));	
+	baseTruncatedVertices[6] = baseVertices[1] + (normalize(topVertex - baseVertices[1]) * (length * mutationFactor));
+	baseTruncatedVertices[7] = baseVertices[1] + (normalize(botVertex - baseVertices[1]) * (length * mutationFactor));	
 																												
 	// From Base Front																								
-	baseTruncatedVertices[8] = baseVertices[2] + (normalize(baseVertices[0] - baseVertices[2]) * (length / 3));
-	baseTruncatedVertices[9] = baseVertices[2] + (normalize(baseVertices[1] - baseVertices[2]) * (length / 3));
-	baseTruncatedVertices[10] = baseVertices[2] + (normalize(topVertex - baseVertices[2]) * (length / 3));
-	baseTruncatedVertices[11] = baseVertices[2] + (normalize(botVertex - baseVertices[2]) * (length / 3));	
+	baseTruncatedVertices[8] = baseVertices[2] + (normalize(baseVertices[0] - baseVertices[2]) * (length * mutationFactor));
+	baseTruncatedVertices[9] = baseVertices[2] + (normalize(baseVertices[1] - baseVertices[2]) * (length * mutationFactor));
+	baseTruncatedVertices[10] = baseVertices[2] + (normalize(topVertex - baseVertices[2]) * (length * mutationFactor));
+	baseTruncatedVertices[11] = baseVertices[2] + (normalize(botVertex - baseVertices[2]) * (length * mutationFactor));	
 																												
 	// From Base Back																							
-	baseTruncatedVertices[12] = baseVertices[3] + (normalize(baseVertices[0] - baseVertices[3]) * (length / 3));
-	baseTruncatedVertices[13] = baseVertices[3] + (normalize(baseVertices[1] - baseVertices[3]) * (length / 3));
-	baseTruncatedVertices[14] = baseVertices[3] + (normalize(topVertex - baseVertices[3]) * (length / 3));
-	baseTruncatedVertices[15] = baseVertices[3] + (normalize(botVertex - baseVertices[3]) * (length / 3));	
+	baseTruncatedVertices[12] = baseVertices[3] + (normalize(baseVertices[0] - baseVertices[3]) * (length * mutationFactor));
+	baseTruncatedVertices[13] = baseVertices[3] + (normalize(baseVertices[1] - baseVertices[3]) * (length * mutationFactor));
+	baseTruncatedVertices[14] = baseVertices[3] + (normalize(topVertex - baseVertices[3]) * (length * mutationFactor));
+	baseTruncatedVertices[15] = baseVertices[3] + (normalize(botVertex - baseVertices[3]) * (length * mutationFactor));	
 
 	// From Top
-	baseTruncatedVertices[16] = topVertex + (normalize(baseVertices[0] - topVertex) * (length / 3));
-	baseTruncatedVertices[17] = topVertex + (normalize(baseVertices[1] - topVertex) * (length / 3));
-	baseTruncatedVertices[18] = topVertex + (normalize(baseVertices[2] - topVertex) * (length / 3));
-	baseTruncatedVertices[19] = topVertex + (normalize(baseVertices[3] - topVertex) * (length / 3));
+	baseTruncatedVertices[16] = topVertex + (normalize(baseVertices[0] - topVertex) * (length * mutationFactor));
+	baseTruncatedVertices[17] = topVertex + (normalize(baseVertices[1] - topVertex) * (length * mutationFactor));
+	baseTruncatedVertices[18] = topVertex + (normalize(baseVertices[2] - topVertex) * (length * mutationFactor));
+	baseTruncatedVertices[19] = topVertex + (normalize(baseVertices[3] - topVertex) * (length * mutationFactor));
 
 	// From Bottom
-	baseTruncatedVertices[20] = botVertex + (normalize(baseVertices[0] - botVertex) * (length / 3));
-	baseTruncatedVertices[21] = botVertex + (normalize(baseVertices[1] - botVertex) * (length / 3));
-	baseTruncatedVertices[22] = botVertex + (normalize(baseVertices[2] - botVertex) * (length / 3));
-	baseTruncatedVertices[23] = botVertex + (normalize(baseVertices[3] - botVertex) * (length / 3));
+	baseTruncatedVertices[20] = botVertex + (normalize(baseVertices[0] - botVertex) * (length * mutationFactor));
+	baseTruncatedVertices[21] = botVertex + (normalize(baseVertices[1] - botVertex) * (length * mutationFactor));
+	baseTruncatedVertices[22] = botVertex + (normalize(baseVertices[2] - botVertex) * (length * mutationFactor));
+	baseTruncatedVertices[23] = botVertex + (normalize(baseVertices[3] - botVertex) * (length * mutationFactor));
 	
 
 	// INDEXING
