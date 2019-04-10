@@ -1,0 +1,62 @@
+#version 330 core
+layout (points) in;
+layout (points, max_vertices = 72) out;
+
+uniform mat4 mvpMat;
+
+float dist_to_base_point = 1.f;
+
+vec4 baseVertices[8];
+vec4 baseTruncatedVertices[24];
+vec4 topVertex;
+vec4 botVertex;
+
+vec4 indexedPoints[72];
+
+void main() {   
+
+	// BASE POINTS
+
+	// Back-Right-Top
+	baseVertices[0] = gl_in[0].gl_Position + (normalize(vec4(-1,1,-1,0)) * dist_to_base_point);	
+	// Back-Right-Bot
+	baseVertices[1] = gl_in[0].gl_Position + (normalize(vec4(-1,-1,-1,0)) * dist_to_base_point);
+	// Back-Left-Top
+	baseVertices[2] = gl_in[0].gl_Position + (normalize(vec4(1,1,-1,0)) * dist_to_base_point);
+	// Back-Left-Bot
+	baseVertices[3] = gl_in[0].gl_Position + (normalize(vec4(1,-1,-1,0)) * dist_to_base_point);
+	// Front-Right-Top
+	baseVertices[4] = gl_in[0].gl_Position + (normalize(vec4(-1,1,1,0)) * dist_to_base_point);	
+	// Front-Right-Bot
+	baseVertices[5] = gl_in[0].gl_Position + (normalize(vec4(-1,-1,1,0)) * dist_to_base_point);
+	// Front-Left-Top
+	baseVertices[6] = gl_in[0].gl_Position + (normalize(vec4(1,1,1,0)) * dist_to_base_point);
+	// Front-Left-Bot
+	baseVertices[7] = gl_in[0].gl_Position + (normalize(vec4(1,-1,1,0)) * dist_to_base_point);
+	
+	// RENDER
+	gl_Position = mvpMat * baseVertices[0];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[1];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[2];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[3];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[4];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[5];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[6];
+	EmitVertex();
+	EndPrimitive();
+	gl_Position = mvpMat * baseVertices[7];
+	EmitVertex();
+	EndPrimitive();
+}
