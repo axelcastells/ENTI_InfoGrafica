@@ -4,6 +4,9 @@ layout (points, max_vertices = 72) out;
 
 uniform mat4 mvpMat;
 
+#define PI 3.1415926535897932384626433832795
+#define TAU PI*2
+
 float dist_to_base_point = 1.f;
 float hexagonSize = .5f;
 
@@ -17,7 +20,7 @@ vec4 indexedPoints[72];
 
 // FUNCTIONS DECLARATIONS
 vec4 GetPlaneVector(int idx);
-mat4 RotationMatrix(vec3 axis, float angle);
+mat4 RotationMatrix(vec4 axis, float angle);
 
 void main() {   
 
@@ -45,12 +48,13 @@ void main() {
 	vec4 inPlaneVec;
 	mat4 rotMat;
 	// Back-Right-Top
+	rotMat = RotationMatrix(baseVertices[0] - gl_in[0].gl_Position, 90);
 	inPlaneVec = GetPlaneVector(0);
 	// 0
-	hexagonVertices[0] = baseVertices[0] + (GetPlaneVector(0) * hexagonSize);
+	hexagonVertices[0] = baseVertices[0] + (inPlaneVec * hexagonSize);
 	// 1
-
-	hexagonVertices[0] = baseVertices[0] + (GetPlaneVector(0) * hexagonSize);
+	inPlaneVec = rotMat * inPlaneVec;
+	hexagonVertices[1] = baseVertices[0] + (inPlaneVec * hexagonSize);
 	// 2
 	// 3
 	// 4
@@ -86,6 +90,9 @@ void main() {
 	gl_Position = mvpMat * hexagonVertices[0];
 	EmitVertex();
 	EndPrimitive();
+	gl_Position = mvpMat * hexagonVertices[1];
+	EmitVertex();
+	EndPrimitive();
 }
 	
 vec4 GetPlaneVector(int idx)
@@ -108,7 +115,8 @@ vec4 GetPlaneVector(int idx)
 	return vector;
 }
 
-mat4 RotationMatrix(vec3 axis, float angle){
+mat4 RotationMatrix(vec4 axis, float angle){
+	angle = angle * PI / 180;
 	axis = normalize(axis);
 	mat4 matrix;
 	matrix[0] = vec4(axis.x*axis.x*(1-cos(angle))+cos(angle), 
