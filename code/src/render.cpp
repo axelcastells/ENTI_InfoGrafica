@@ -19,14 +19,23 @@ float Random(float min, float max) {
 
 	return min + (rand() - 0) * (max - min) / (RAND_MAX - 0);
 }
+float MapValue(float val, float inMin, float inMax, float outMin, float outMax) {
+	return outMin + (val - inMin) * (outMax - outMin) / (inMax - inMin);
+}
 
-#define POINTS_COUNT 1
+#define POINTS_COUNT 10
 
 #define SPACE_WIDTH 10
 #define SPACE_HEIGHT 10
 #define SPACE_DEPTH 10
-namespace GlobalVars {
 
+#define PI 3.1415926535897932384626433832795
+#define TAU PI*2
+
+namespace GlobalVars {
+	static unsigned int CURRENT_SCENE = 1;
+	static float CUBE_WIDTH = 1.2f;
+	static float MUTATOR = 0.1f;
 
 }
 
@@ -422,7 +431,7 @@ namespace Points {
 			float dirZ = Random(-1, 1);
 			glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
 			
-			std::cout << "RAND: " << rand() * .00001f << std::endl;
+			//std::cout << "RAND: " << rand() * .00001f << std::endl;
 			positions[i] += dir * speed;
 			
 			// CLAMP
@@ -440,7 +449,7 @@ namespace Points {
 
 			glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glPointSize(10);
 
 			for (int i = 0; i < POINTS_COUNT; i++) {
@@ -464,7 +473,13 @@ namespace Honeycomb {
 	void setupPoints() {
 
 		for (int i = 0; i < POINTS_COUNT; i++) {
-			positions[i] = glm::vec3(0);
+			if (i % 2 == 0) {
+				positions[i] = glm::vec3(0, GlobalVars::CUBE_WIDTH * i, 0);
+
+			}
+			else {
+				positions[i] = glm::vec3(GlobalVars::CUBE_WIDTH, GlobalVars::CUBE_WIDTH * i, GlobalVars::CUBE_WIDTH);
+			}
 			//Points::positions[i] = { rand() % SPACE_WIDTH - SPACE_WIDTH/2, 
 			//						rand() % SPACE_HEIGHT, 
 			//						rand() %  SPACE_DEPTH - SPACE_DEPTH/2 };
@@ -497,25 +512,37 @@ namespace Honeycomb {
 
 	}
 
-	void updatePoints() {
-		for (int i = 0; i < POINTS_COUNT; i++) {
+	void updatePoints(float dt) {
 
-			//srand(randomizer+i);
-			float speed = Random(0, 5.f);
-			float dirX = Random(-1, 1);
-			float dirY = Random(-1, 1);
-			float dirZ = Random(-1, 1);
-			glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
+		static float s = 0;
 
-			std::cout << "RAND: " << rand() * .00001f << std::endl;
-			positions[i] += dir * speed;
+		s += dt;
 
-			// CLAMP
-			positions[i].x = glm::clamp(positions[i].x, (float)-(SPACE_WIDTH / 2), (float)SPACE_WIDTH / 2);
-			positions[i].y = glm::clamp(positions[i].y, .0f, (float)SPACE_WIDTH);
-			positions[i].z = glm::clamp(positions[i].z, (float)-(SPACE_DEPTH / 2), (float)SPACE_DEPTH / 2);
+		if (dt >= TAU) {
+			s = 0;
 		}
-		randomizer++;
+		
+		GlobalVars::MUTATOR = MapValue(cos(s), -1, 1, 0.1f, 0.8f);
+		std::cout << GlobalVars::MUTATOR << std::endl;
+		
+		//for (int i = 0; i < POINTS_COUNT; i++) {
+
+		//	//srand(randomizer+i);
+		//	float speed = Random(0, 5.f);
+		//	float dirX = Random(-1, 1);
+		//	float dirY = Random(-1, 1);
+		//	float dirZ = Random(-1, 1);
+		//	glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
+
+		//	std::cout << "RAND: " << rand() * .00001f << std::endl;
+		//	positions[i] += dir * speed;
+
+		//	// CLAMP
+		//	positions[i].x = glm::clamp(positions[i].x, (float)-(SPACE_WIDTH / 2), (float)SPACE_WIDTH / 2);
+		//	positions[i].y = glm::clamp(positions[i].y, .0f, (float)SPACE_WIDTH);
+		//	positions[i].z = glm::clamp(positions[i].z, (float)-(SPACE_DEPTH / 2), (float)SPACE_DEPTH / 2);
+		//}
+		//randomizer++;
 	}
 
 	void drawPoints() {
@@ -525,15 +552,20 @@ namespace Honeycomb {
 
 		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(program, "mutationFactor"), GlobalVars::MUTATOR);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glPointSize(10);
 
-		for (int i = 0; i < POINTS_COUNT; i++) {
+		glDrawArrays(GL_POINTS, 0, POINTS_COUNT);
+		//for (int i = 0; i < POINTS_COUNT; i++) {
 
-			objMat = glm::translate(glm::mat4(1), positions[i]);
-			glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-			glDrawArrays(GL_POINTS, i, 1);
-		}
+		//	objMat = glm::translate(glm::mat4(1), positions[i]);
+		//	glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		//	glDrawArrays(GL_POINTS, i, 1);
+		//}
 
 	}
 }
@@ -555,6 +587,7 @@ void GLinit(int width, int height) {
 
 
 	// Setup shaders & geometry
+	Points::setupPoints();
 	Honeycomb::setupPoints();
 	Axis::setupAxis();
 	Cube::setupCube();
@@ -593,7 +626,24 @@ void GLrender(float dt) {
 	RV::_MVP = RV::_projection * RV::_modelView;
 
 	//Points::updatePoints();
-	Honeycomb::drawPoints();
+	switch (GlobalVars::CURRENT_SCENE)
+	{
+	case 0:
+	{
+		Points::updatePoints();
+		Points::drawPoints();
+	}break;
+	case 1:
+	{
+		Honeycomb::updatePoints(dt);
+		Honeycomb::drawPoints();
+
+	}break;
+	case 2:
+	{
+
+	}break;
+	}
 	Axis::drawAxis();
 	//Cube::drawCube();
 	/////////////////////////////////////////////////////TODO
