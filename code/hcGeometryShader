@@ -1,6 +1,6 @@
 #version 330 core
 layout (points) in;
-layout (triangle_strip, max_vertices = 144) out;
+layout (points, max_vertices = 144) out;
 
 uniform mat4 mvpMat;
 
@@ -60,13 +60,8 @@ void main() {
 	}
 
 	// INDEXING (MAX 144)
-	/*
-	for(int i = 0; i < 6*8; i++){
-		indexedPoints[i] = hexagonVertices[i];
-	}
-	*/
-	//Hexagons (8)
 
+	//Hexagons (8)
 	indexedPoints[0] = hexagonVertices[(6 * 0) + 0];
 	indexedPoints[1] = hexagonVertices[(6 * 0) + 0];
 	indexedPoints[2] = hexagonVertices[(6 * 0) + 0];
@@ -241,18 +236,20 @@ void main() {
 
 
 	// RENDER
-	/*
-	for(int i = 0; i < 6*8; i++){
-		gl_Position = mvpMat * indexedPoints[i];
-		EmitVertex();
-		EndPrimitive();
-	}
-	*/
+	
+	//Hexagons (8)
+	//0
+	gl_Position = mvpMat * indexedPoints[0];
+	EmitVertex();
+	EndPrimitive();
 
-
+	//Quads (12)
+	//Octagons (6)
 
 }
-	
+
+// FUNCTIONS
+
 vec4 GetPlaneVector(int idx)
 {
 	vec4 norm = baseVertices[idx] - gl_in[0].gl_Position;
