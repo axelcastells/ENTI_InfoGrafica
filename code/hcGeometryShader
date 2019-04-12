@@ -1,6 +1,6 @@
 #version 330 core
 layout (points) in;
-layout (triangle_strip, max_vertices = 144) out;
+layout (points, max_vertices = 144) out;
 
 uniform mat4 mvpMat;
 
@@ -8,7 +8,7 @@ uniform mat4 mvpMat;
 #define TAU PI*2
 
 float dist_to_base_point = 1.f;
-float mutationFactor = 0.7;
+float mutationFactor = 0.5;
 
 vec4 baseVertices[8];
 vec4 hexagonVertices[6*8];
@@ -183,22 +183,22 @@ void main() {
 	//TOP
 	indexedPoints[96] = hexagonVertices[(6 * 0) + 3];
 	indexedPoints[97] = hexagonVertices[(6 * 0) + 4];
-	indexedPoints[98] = hexagonVertices[(6 * 2) + 3];
-	indexedPoints[99] = hexagonVertices[(6 * 2) + 4];
-	indexedPoints[100] = hexagonVertices[(6 * 4) + 3];
-	indexedPoints[101] = hexagonVertices[(6 * 4) + 4];
+	indexedPoints[98] = hexagonVertices[(6 * 2) + 1];
+	indexedPoints[99] = hexagonVertices[(6 * 2) + 2];
+	indexedPoints[100] = hexagonVertices[(6 * 4) + 1];
+	indexedPoints[101] = hexagonVertices[(6 * 4) + 2];
 	indexedPoints[102] = hexagonVertices[(6 * 6) + 3];
 	indexedPoints[103] = hexagonVertices[(6 * 6) + 4];
 	
 	//BOT
-	indexedPoints[104] = hexagonVertices[(6 * 1) + 0];
-	indexedPoints[105] = hexagonVertices[(6 * 1) + 0];
-	indexedPoints[106] = hexagonVertices[(6 * 3) + 0];
-	indexedPoints[107] = hexagonVertices[(6 * 3) + 0];
-	indexedPoints[108] = hexagonVertices[(6 * 5) + 0];
-	indexedPoints[109] = hexagonVertices[(6 * 5) + 0];
-	indexedPoints[110] = hexagonVertices[(6 * 7) + 0];
-	indexedPoints[111] = hexagonVertices[(6 * 7) + 0];
+	indexedPoints[104] = hexagonVertices[(6 * 1) + 2];
+	indexedPoints[105] = hexagonVertices[(6 * 1) + 1];
+	indexedPoints[106] = hexagonVertices[(6 * 3) + 4];
+	indexedPoints[107] = hexagonVertices[(6 * 3) + 3];
+	indexedPoints[108] = hexagonVertices[(6 * 5) + 4];
+	indexedPoints[109] = hexagonVertices[(6 * 5) + 3];
+	indexedPoints[110] = hexagonVertices[(6 * 7) + 1];
+	indexedPoints[111] = hexagonVertices[(6 * 7) + 2];
 	
 	//LEFT
 	indexedPoints[112] = hexagonVertices[(6 * 2) + 0];
@@ -242,7 +242,7 @@ void main() {
 
 
 	// RENDER
-	
+	/*
 	//Hexagons (8)
 	for(int i = 0; i < 48; i++){
 		if(i%6 == 0 && i != 0){
@@ -262,16 +262,17 @@ void main() {
 		EmitVertex();
 	}
 	EndPrimitive();
-	
+	*/
 	//Octagons (6)
 		for(int i = 96; i < 144; i++){
 		if(i%8 == 0 && i != 96){
-			EndPrimitive();
+			//EndPrimitive();
 		}
 		gl_Position = mvpMat * indexedPoints[i];
 		EmitVertex();
+		EndPrimitive();
 	}
-	EndPrimitive();
+	//EndPrimitive();
 
 }
 

@@ -525,7 +525,8 @@ namespace Honeycomb {
 
 		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPointSize(10);
 
 		for (int i = 0; i < POINTS_COUNT; i++) {
 
