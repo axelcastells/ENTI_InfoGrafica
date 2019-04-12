@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include "GL_framework.h"
-#include "Texture.h"
 
 namespace ResourcesManager {
 	extern std::string ReadFile(const char* filePath);
