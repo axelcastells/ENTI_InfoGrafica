@@ -8,7 +8,7 @@ uniform mat4 mvpMat;
 #define TAU PI*2
 
 float dist_to_base_point = 1.f;
-float mutationFactor = 0.5f;
+float mutationFactor = 0.7;
 
 vec4 baseVertices[8];
 vec4 hexagonVertices[6*8];
@@ -180,63 +180,69 @@ void main() {
 	indexedPoints[95] = hexagonVertices[(6 * 7) + 5];
 
 	//Octagons (6)
-	indexedPoints[96] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[97] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[98] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[99] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[100] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[101] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[102] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[103] = hexagonVertices[(6 * 0) + 0];
+	//TOP
+	indexedPoints[96] = hexagonVertices[(6 * 0) + 3];
+	indexedPoints[97] = hexagonVertices[(6 * 0) + 4];
+	indexedPoints[98] = hexagonVertices[(6 * 2) + 3];
+	indexedPoints[99] = hexagonVertices[(6 * 2) + 4];
+	indexedPoints[100] = hexagonVertices[(6 * 4) + 3];
+	indexedPoints[101] = hexagonVertices[(6 * 4) + 4];
+	indexedPoints[102] = hexagonVertices[(6 * 6) + 3];
+	indexedPoints[103] = hexagonVertices[(6 * 6) + 4];
 	
-	indexedPoints[104] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[105] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[106] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[107] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[108] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[109] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[110] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[111] = hexagonVertices[(6 * 0) + 0];
+	//BOT
+	indexedPoints[104] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[105] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[106] = hexagonVertices[(6 * 3) + 0];
+	indexedPoints[107] = hexagonVertices[(6 * 3) + 0];
+	indexedPoints[108] = hexagonVertices[(6 * 5) + 0];
+	indexedPoints[109] = hexagonVertices[(6 * 5) + 0];
+	indexedPoints[110] = hexagonVertices[(6 * 7) + 0];
+	indexedPoints[111] = hexagonVertices[(6 * 7) + 0];
 	
-	indexedPoints[112] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[113] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[114] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[115] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[116] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[117] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[118] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[119] = hexagonVertices[(6 * 0) + 0];
+	//LEFT
+	indexedPoints[112] = hexagonVertices[(6 * 2) + 0];
+	indexedPoints[113] = hexagonVertices[(6 * 2) + 0];
+	indexedPoints[114] = hexagonVertices[(6 * 3) + 0];
+	indexedPoints[115] = hexagonVertices[(6 * 3) + 0];
+	indexedPoints[116] = hexagonVertices[(6 * 6) + 0];
+	indexedPoints[117] = hexagonVertices[(6 * 6) + 0];
+	indexedPoints[118] = hexagonVertices[(6 * 7) + 0];
+	indexedPoints[119] = hexagonVertices[(6 * 7) + 0];
 
+	//RIGHT
 	indexedPoints[120] = hexagonVertices[(6 * 0) + 0];
 	indexedPoints[121] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[122] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[123] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[124] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[125] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[126] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[127] = hexagonVertices[(6 * 0) + 0];
+	indexedPoints[122] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[123] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[124] = hexagonVertices[(6 * 4) + 0];
+	indexedPoints[125] = hexagonVertices[(6 * 4) + 0];
+	indexedPoints[126] = hexagonVertices[(6 * 5) + 0];
+	indexedPoints[127] = hexagonVertices[(6 * 5) + 0];
 	
+	//BACK
 	indexedPoints[128] = hexagonVertices[(6 * 0) + 0];
 	indexedPoints[129] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[130] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[131] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[132] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[133] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[134] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[135] = hexagonVertices[(6 * 0) + 0];
+	indexedPoints[130] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[131] = hexagonVertices[(6 * 1) + 0];
+	indexedPoints[132] = hexagonVertices[(6 * 2) + 0];
+	indexedPoints[133] = hexagonVertices[(6 * 2) + 0];
+	indexedPoints[134] = hexagonVertices[(6 * 3) + 0];
+	indexedPoints[135] = hexagonVertices[(6 * 3) + 0];
 	
-	indexedPoints[136] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[137] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[138] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[139] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[140] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[141] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[142] = hexagonVertices[(6 * 0) + 0];
-	indexedPoints[143] = hexagonVertices[(6 * 0) + 0];
+	//FRONT
+	indexedPoints[136] = hexagonVertices[(6 * 4) + 0];
+	indexedPoints[137] = hexagonVertices[(6 * 4) + 0];
+	indexedPoints[138] = hexagonVertices[(6 * 5) + 0];
+	indexedPoints[139] = hexagonVertices[(6 * 5) + 0];
+	indexedPoints[140] = hexagonVertices[(6 * 6) + 0];
+	indexedPoints[141] = hexagonVertices[(6 * 6) + 0];
+	indexedPoints[142] = hexagonVertices[(6 * 7) + 0];
+	indexedPoints[143] = hexagonVertices[(6 * 7) + 0];
 
 
 	// RENDER
-
+	
 	//Hexagons (8)
 	for(int i = 0; i < 48; i++){
 		if(i%6 == 0 && i != 0){
@@ -256,8 +262,16 @@ void main() {
 		EmitVertex();
 	}
 	EndPrimitive();
-
+	
 	//Octagons (6)
+		for(int i = 96; i < 144; i++){
+		if(i%8 == 0 && i != 96){
+			EndPrimitive();
+		}
+		gl_Position = mvpMat * indexedPoints[i];
+		EmitVertex();
+	}
+	EndPrimitive();
 
 }
 
