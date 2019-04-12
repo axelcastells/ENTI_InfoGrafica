@@ -28,14 +28,17 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 #define SPACE_HEIGHT 10
 #define SPACE_DEPTH 10
 
+#define MIN_SPEED 0
+#define MAX_SPEED 10
+
 #define PI 3.1415926535897932384626433832795
 #define TAU PI*2
 
 namespace GlobalVars {
-	static unsigned int CURRENT_SCENE = 1;
+	static unsigned int CURRENT_SCENE = 0;
 	static float CUBE_WIDTH = 1.2f;
 	static float MUTATOR = 0.1f;
-
+	static float speed = 0.f;
 }
 
 ///////// fw decl
@@ -424,14 +427,14 @@ namespace Points {
 		for (int i = 0; i < POINTS_COUNT; i++) {
 			
 			//srand(randomizer+i);
-			float speed = Random(0, 5.f);
+
 			float dirX = Random(-1, 1);
 			float dirY = Random(-1, 1);
 			float dirZ = Random(-1, 1);
 			glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
 			
 			//std::cout << "RAND: " << rand() * .00001f << std::endl;
-			positions[i] += dir * speed;
+			positions[i] += dir * GlobalVars::speed;
 			
 			// CLAMP
 			positions[i].x = glm::clamp(positions[i].x, (float)-(SPACE_WIDTH / 2), (float)SPACE_WIDTH / 2);
@@ -638,6 +641,13 @@ void GUI() {
 	{
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		ImGui::Text("Choose the exercise");
+		if (ImGui::Button("Current Scene")) {
+			if (GlobalVars::CURRENT_SCENE == 0) GlobalVars::CURRENT_SCENE = 1;
+			else if (GlobalVars::CURRENT_SCENE == 1) GlobalVars::CURRENT_SCENE = 0;
+		}
+		if (GlobalVars::CURRENT_SCENE == 0) ImGui::DragFloat("Movement Intensity", &GlobalVars::speed, 0.1, MIN_SPEED, MAX_SPEED, "%.3f");
+		
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
 		// ...
