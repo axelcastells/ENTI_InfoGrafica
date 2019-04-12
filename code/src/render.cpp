@@ -468,8 +468,6 @@ namespace Honeycomb {
 	static glm::vec3 positions[POINTS_COUNT];
 	glm::mat4 objMat(1.f);
 
-	int randomizer;
-
 	void setupPoints() {
 
 		for (int i = 0; i < POINTS_COUNT; i++) {
@@ -480,9 +478,7 @@ namespace Honeycomb {
 			else {
 				positions[i] = glm::vec3(GlobalVars::CUBE_WIDTH, GlobalVars::CUBE_WIDTH * i, GlobalVars::CUBE_WIDTH);
 			}
-			//Points::positions[i] = { rand() % SPACE_WIDTH - SPACE_WIDTH/2, 
-			//						rand() % SPACE_HEIGHT, 
-			//						rand() %  SPACE_DEPTH - SPACE_DEPTH/2 };
+
 		}
 
 
@@ -523,26 +519,6 @@ namespace Honeycomb {
 		}
 		
 		GlobalVars::MUTATOR = MapValue(cos(s), -1, 1, 0.1f, 0.8f);
-		std::cout << GlobalVars::MUTATOR << std::endl;
-		
-		//for (int i = 0; i < POINTS_COUNT; i++) {
-
-		//	//srand(randomizer+i);
-		//	float speed = Random(0, 5.f);
-		//	float dirX = Random(-1, 1);
-		//	float dirY = Random(-1, 1);
-		//	float dirZ = Random(-1, 1);
-		//	glm::vec3 dir = glm::normalize(glm::vec3(dirX, dirY, dirZ));
-
-		//	std::cout << "RAND: " << rand() * .00001f << std::endl;
-		//	positions[i] += dir * speed;
-
-		//	// CLAMP
-		//	positions[i].x = glm::clamp(positions[i].x, (float)-(SPACE_WIDTH / 2), (float)SPACE_WIDTH / 2);
-		//	positions[i].y = glm::clamp(positions[i].y, .0f, (float)SPACE_WIDTH);
-		//	positions[i].z = glm::clamp(positions[i].z, (float)-(SPACE_DEPTH / 2), (float)SPACE_DEPTH / 2);
-		//}
-		//randomizer++;
 	}
 
 	void drawPoints() {
