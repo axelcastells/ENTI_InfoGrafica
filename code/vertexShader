@@ -1,0 +1,9 @@
+#version 330
+layout (location = 0) in vec3 in_Position;
+//in vec3 in_Normal;
+//out vec4 vert_Normal;
+uniform mat4 objMat;
+
+void main() {
+	gl_Position = objMat * vec4(in_Position, 1.0);
+}
