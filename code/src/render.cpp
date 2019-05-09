@@ -11,9 +11,14 @@
 
 #include "GL_framework.h"
 
+#pragma region Externs
+namespace ModelLoader {
+	extern bool LoadOBJ(const char* path, std::vector< glm::vec3> & out_vertices, std::vector< glm::vec2> & out_uvs, std::vector< glm::vec3> & out_normals);
+}
 namespace ResourcesManager {
 	extern std::string ReadFile(const char* filePath);
 }
+#pragma endregion
 float Random(float min, float max) {
 
 	return min + (rand() - 0) * (max - min) / (RAND_MAX - 0);
@@ -33,6 +38,10 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 
 #define PI 3.1415926535897932384626433832795
 #define TAU PI*2
+
+#define VERT_SHADER_CABINS "vertexShader"
+#define FRAG_SHADER_CABINS "fragmentShader"
+#define OBJ_PATH_CABIN "Cabin.obj"
 
 namespace GlobalVars {
 	static unsigned int CURRENT_SCENE = 0;
@@ -379,7 +388,70 @@ namespace Cube {
 }
 
 /////////////////////////////////////////////////
+// CABINS
+namespace Cabins {
+	unsigned int COUNT = 1;
+	GLuint vao;
+	GLuint vbo[3];
+	GLuint shaders[2];
+	GLuint program;
+	glm::mat4 objMat = glm::mat4(1.f);
 
+	std::vector<glm::vec3> dataVerts;
+	std::vector<glm::vec3> dataNorms;
+	std::vector<glm::vec2> dataUvs;
+
+	void setup() {
+		ModelLoader::LoadOBJ(OBJ_PATH_CABIN, dataVerts, dataUvs, dataNorms);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(3, vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataVerts.size(), dataVerts.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataNorms.size(), dataNorms.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * dataUvs.size(), dataUvs.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		shaders[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
+		shaders[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+
+		program = glCreateProgram();
+		glAttachShader(program, shaders[0]);
+		glAttachShader(program, shaders[1]);
+		glBindAttribLocation(program, 0, "in_Position");
+		glBindAttribLocation(program, 1, "in_Normal");
+		linkProgram(program);
+	}
+
+	void draw() {
+		glBindVertexArray(vao);
+		glUseProgram(program);
+
+		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+
+		glDrawArraysInstanced(GL_TRIANGLES, 0, dataVerts.size(), COUNT);
+		//glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+}
 
 
 void GLinit(int width, int height) {
@@ -397,6 +469,7 @@ void GLinit(int width, int height) {
 	// Setup shaders & geometry
 	Axis::setupAxis();
 	Cube::setupCube();
+	Cabins::setup();
 	
 
 
@@ -436,8 +509,7 @@ void GLrender(float dt) {
 	{
 	case 0:
 	{
-		Points::updatePoints();
-		Points::drawPoints();
+		Cabins::draw();
 	}break;
 	case 1:
 	{
