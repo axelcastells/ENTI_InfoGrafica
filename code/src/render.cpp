@@ -57,6 +57,8 @@ static GLuint SHADERS[2];
 #define OBJ_PATH_CABIN "Cabin.obj"
 #define OBJ_PATH_WHEEL "Wheel.obj"
 #define OBJ_PATH_BASE "Base.obj"
+#define OBJ_PATH_TRUMP "Trump.obj"
+#define OBJ_PATH_CHICKEN "Chicken.obj"
 
 #define SINGLE_FRAME_ANGLE(_dt) (float)(TAU * FREQUENCE * _dt)
 
@@ -476,7 +478,6 @@ namespace Cabins {
 namespace Wheel {
 	GLuint vao;
 	GLuint vbo[3];
-	unsigned int framesElapsed = 0;
 	glm::mat4 objMat = glm::mat4(1.f);
 
 	std::vector<glm::vec3> dataVerts;
@@ -529,7 +530,164 @@ namespace Wheel {
 }
 // BASE
 namespace Base {
+	GLuint vao;
+	GLuint vbo[3];
+	glm::mat4 objMat = glm::mat4(1.f);
 
+	std::vector<glm::vec3> dataVerts;
+	std::vector<glm::vec3> dataNorms;
+	std::vector<glm::vec2> dataUvs;
+
+	void setup() {
+		ModelLoader::LoadOBJ(OBJ_PATH_BASE, dataVerts, dataUvs, dataNorms);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(3, vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataVerts.size(), dataVerts.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataNorms.size(), dataNorms.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * dataUvs.size(), dataUvs.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void draw() {
+		glBindVertexArray(vao);
+		glUseProgram(PROGRAM);
+
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+}
+// CHARACTERS
+namespace Trump {
+	GLuint vao;
+	GLuint vbo[3];
+	glm::mat4 objMat = glm::mat4(1.f);
+
+	std::vector<glm::vec3> dataVerts;
+	std::vector<glm::vec3> dataNorms;
+	std::vector<glm::vec2> dataUvs;
+
+	void setup() {
+		ModelLoader::LoadOBJ(OBJ_PATH_TRUMP, dataVerts, dataUvs, dataNorms);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(3, vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataVerts.size(), dataVerts.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataNorms.size(), dataNorms.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * dataUvs.size(), dataUvs.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void Update(float _dt) {
+		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
+
+		objMat = glm::translate(objMat, glm::vec3(0));
+	}
+
+	void draw() {
+		glBindVertexArray(vao);
+		glUseProgram(PROGRAM);
+
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+}
+namespace Chicken {
+	GLuint vao;
+	GLuint vbo[3];
+	glm::mat4 objMat = glm::mat4(1.f);
+
+	std::vector<glm::vec3> dataVerts;
+	std::vector<glm::vec3> dataNorms;
+	std::vector<glm::vec2> dataUvs;
+
+	void setup() {
+		ModelLoader::LoadOBJ(OBJ_PATH_CHICKEN, dataVerts, dataUvs, dataNorms);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(3, vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataVerts.size(), dataVerts.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataNorms.size(), dataNorms.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * dataUvs.size(), dataUvs.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void Update(float _dt) {
+		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
+
+		objMat = glm::translate(objMat, glm::vec3(0));
+	}
+
+	void draw() {
+		glBindVertexArray(vao);
+		glUseProgram(PROGRAM);
+
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
 }
 
 
@@ -559,8 +717,11 @@ void GLinit(int width, int height) {
 	Axis::setupAxis();
 	Cube::setupCube();
 
+	Base::setup();
 	Wheel::setup();
 	Cabins::setup();
+	Trump::setup();
+	Chicken::setup();
 	
 
 
@@ -603,9 +764,14 @@ void GLrender(float dt) {
 	{
 		Wheel::Update(dt);
 		Cabins::Update(dt);
+		Trump::Update(dt);
+		Chicken::Update(dt);
 
-		Wheel::draw();
-		Cabins::draw();
+		//Wheel::draw();
+		//Cabins::draw();
+		Base::draw();
+		Trump::draw();
+		Chicken::draw();
 	}break;
 	case 1:
 	{
