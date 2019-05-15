@@ -27,6 +27,18 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 	return outMin + (val - inMin) * (outMax - outMin) / (inMax - inMin);
 }
 
+#pragma region Global Vars
+static float WHEEL_DISTANCE = 56;
+static float FREQUENCE = 0.01f;
+static unsigned int CURRENT_SCENE = 0;
+static float CUBE_WIDTH = 1.2f;
+static float MUTATOR = 0.1f;
+
+static float CURRENT_TIME;
+static GLuint PROGRAM;
+static GLuint SHADERS[2];
+#pragma endregion
+
 #define POINTS_COUNT 10
 
 #define SPACE_WIDTH 10
@@ -41,14 +53,12 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 
 #define VERT_SHADER_CABINS "vertexShader"
 #define FRAG_SHADER_CABINS "fragmentShader"
-#define OBJ_PATH_CABIN "Cabin.obj"
 
-namespace GlobalVars {
-	static unsigned int CURRENT_SCENE = 0;
-	static float CUBE_WIDTH = 1.2f;
-	static float MUTATOR = 0.1f;
-	static float speed = 0.f;
-}
+#define OBJ_PATH_CABIN "Cabin.obj"
+#define OBJ_PATH_WHEEL "Wheel.obj"
+#define OBJ_PATH_BASE "Base.obj"
+
+#define SINGLE_FRAME_ANGLE(_dt) (float)(TAU * FREQUENCE * _dt)
 
 ///////// fw decl
 namespace ImGui {
@@ -64,7 +74,7 @@ void drawAxis();
 namespace RenderVars {
 	const float FOV = glm::radians(65.f);
 	const float zNear = 1.f;
-	const float zFar = 50.f;
+	const float zFar = 150.f;
 
 	glm::mat4 _projection;
 	glm::mat4 _modelView;
@@ -133,14 +143,14 @@ GLuint compileShader(const char* shaderStr, GLenum shaderType, const char* name=
 	}
 	return shader;
 }
-void linkProgram(GLuint program) {
-	glLinkProgram(program);
+void linkProgram(GLuint PROGRAM) {
+	glLinkProgram(PROGRAM);
 	GLint res;
-	glGetProgramiv(program, GL_LINK_STATUS, &res);
+	glGetProgramiv(PROGRAM, GL_LINK_STATUS, &res);
 	if (res == GL_FALSE) {
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &res);
+		glGetProgramiv(PROGRAM, GL_INFO_LOG_LENGTH, &res);
 		char *buff = new char[res];
-		glGetProgramInfoLog(program, res, &res, buff);
+		glGetProgramInfoLog(PROGRAM, res, &res, buff);
 		fprintf(stderr, "Error Link: %s", buff);
 		delete[] buff;
 	}
@@ -390,11 +400,10 @@ namespace Cube {
 /////////////////////////////////////////////////
 // CABINS
 namespace Cabins {
-	unsigned int COUNT = 1;
+	int COUNT = 20;
 	GLuint vao;
 	GLuint vbo[3];
-	GLuint shaders[2];
-	GLuint program;
+
 	glm::mat4 objMat = glm::mat4(1.f);
 
 	std::vector<glm::vec3> dataVerts;
@@ -426,31 +435,101 @@ namespace Cabins {
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		shaders[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
-		shaders[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+	}
+	void GetPositionInWheel(glm::mat4 &_objMat, int _index, float _t) {
+		_objMat = glm::mat4(1);
 
-		program = glCreateProgram();
-		glAttachShader(program, shaders[0]);
-		glAttachShader(program, shaders[1]);
-		glBindAttribLocation(program, 0, "in_Position");
-		glBindAttribLocation(program, 1, "in_Normal");
-		linkProgram(program);
+		float axisA = WHEEL_DISTANCE * glm::cos(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
+		float axisB = WHEEL_DISTANCE * glm::sin(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
+
+		glm::vec3 traslation(0, axisA, axisB);
+
+		_objMat = glm::translate(_objMat, traslation);
+	}
+
+	void Update(float _dt) {
+		CURRENT_TIME += _dt;
 	}
 
 	void draw() {
 		glBindVertexArray(vao);
-		glUseProgram(program);
+		glUseProgram(PROGRAM);
 
-		glUniformMatrix4fv(glGetUniformLocation(program, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(program, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		glDrawArraysInstanced(GL_TRIANGLES, 0, dataVerts.size(), COUNT);
+
+		for (int i = 0; i < COUNT; i++) {
+
+			GetPositionInWheel(objMat, i, CURRENT_TIME);
+			glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+		}
+		
 		//glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
+}
+// WHEEL
+namespace Wheel {
+	GLuint vao;
+	GLuint vbo[3];
+	unsigned int framesElapsed = 0;
+	glm::mat4 objMat = glm::mat4(1.f);
+
+	std::vector<glm::vec3> dataVerts;
+	std::vector<glm::vec3> dataNorms;
+	std::vector<glm::vec2> dataUvs;
+
+	void setup() {
+		ModelLoader::LoadOBJ(OBJ_PATH_WHEEL, dataVerts, dataUvs, dataNorms);
+
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(3, vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataVerts.size(), dataVerts.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * dataNorms.size(), dataNorms.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * dataUvs.size(), dataUvs.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer((GLuint)2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	void Update(float _dt) {
+		objMat = glm::rotate(objMat, SINGLE_FRAME_ANGLE(_dt), glm::vec3(1, 0, 0));
+	}
+
+	void draw() {
+		glBindVertexArray(vao);
+		glUseProgram(PROGRAM);
+
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
+		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+}
+// BASE
+namespace Base {
+
 }
 
 
@@ -467,8 +546,20 @@ void GLinit(int width, int height) {
 
 
 	// Setup shaders & geometry
+	SHADERS[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
+	SHADERS[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+
+	PROGRAM = glCreateProgram();
+	glAttachShader(PROGRAM, SHADERS[0]);
+	glAttachShader(PROGRAM, SHADERS[1]);
+	glBindAttribLocation(PROGRAM, 0, "in_Position");
+	glBindAttribLocation(PROGRAM, 1, "in_Normal");
+	linkProgram(PROGRAM);
+
 	Axis::setupAxis();
 	Cube::setupCube();
+
+	Wheel::setup();
 	Cabins::setup();
 	
 
@@ -495,6 +586,7 @@ void GLcleanup() {
 }
 
 void GLrender(float dt) {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	RV::_modelView = glm::mat4(1.f);
@@ -505,10 +597,14 @@ void GLrender(float dt) {
 	RV::_MVP = RV::_projection * RV::_modelView;
 
 	//Points::updatePoints();
-	switch (GlobalVars::CURRENT_SCENE)
+	switch (CURRENT_SCENE)
 	{
 	case 0:
 	{
+		Wheel::Update(dt);
+		Cabins::Update(dt);
+
+		Wheel::draw();
 		Cabins::draw();
 	}break;
 	case 1:
@@ -541,10 +637,9 @@ void GUI() {
 
 		ImGui::Text("Choose the exercise");
 		if (ImGui::Button("Current Scene")) {
-			if (GlobalVars::CURRENT_SCENE == 0) GlobalVars::CURRENT_SCENE = 1;
-			else if (GlobalVars::CURRENT_SCENE == 1) GlobalVars::CURRENT_SCENE = 0;
+			if (CURRENT_SCENE == 0) CURRENT_SCENE = 1;
+			else if (CURRENT_SCENE == 1) CURRENT_SCENE = 0;
 		}
-		if (GlobalVars::CURRENT_SCENE == 0) ImGui::DragFloat("Movement Intensity", &GlobalVars::speed, 0.1, MIN_SPEED, MAX_SPEED, "%.3f");
 		
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
