@@ -3,6 +3,7 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <cstdio>
 #include <cassert>
+#include <chrono>
 
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_sdl_gl3.h>
@@ -33,6 +34,8 @@ static float FREQUENCE = 0.01f;
 static unsigned int CURRENT_SCENE = 0;
 static float CUBE_WIDTH = 1.2f;
 static float MUTATOR = 0.1f;
+
+static float CAMERA_DISTANCE = 30;
 
 static float CURRENT_TIME;
 static GLuint PROGRAM;
@@ -402,7 +405,7 @@ namespace Cube {
 /////////////////////////////////////////////////
 // CABINS
 namespace Cabins {
-	int COUNT = 1; //20
+	int COUNT = 20; //20
 	GLuint vao;
 	GLuint vbo[3];
 
@@ -582,6 +585,7 @@ namespace Trump {
 	GLuint vao;
 	GLuint vbo[3];
 	glm::mat4 objMat = glm::mat4(1.f);
+	glm::mat4 worldMat(1);
 
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
@@ -618,6 +622,7 @@ namespace Trump {
 		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
 		objMat = glm::translate(objMat, glm::vec3(0,-5.5f,-1.5f));
 		objMat = glm::scale(objMat, glm::vec3(2));
+		worldMat = objMat;
 	}
 
 	void draw() {
@@ -637,7 +642,8 @@ namespace Trump {
 namespace Chicken {
 	GLuint vao;
 	GLuint vbo[3];
-	glm::mat4 objMat = glm::mat4(1.f);
+	glm::mat4 objMat(1);
+	glm::mat4 worldMat(1);
 
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
@@ -674,6 +680,7 @@ namespace Chicken {
 		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
 		objMat = glm::translate(objMat, glm::vec3(0, -4.5f, 1.5f));
 		objMat = glm::scale(objMat, glm::vec3(2,2,-2));
+		worldMat = objMat;
 	}
 
 	void draw() {
@@ -746,17 +753,44 @@ void GLcleanup() {
 	// ...
 	/////////////////////////////////////////////////////////
 }
+// Cabina:	0
+// Vaca:	1
+// Pollo:	2
+glm::mat4 CameraLookAtMatrix(glm::mat4 cameraMat, unsigned int targetId) {
+		glm::vec4 point(0);
+		point.w = 1;
+		glm::mat4 cabinMat;
+		Cabins::GetPositionInWheel(cabinMat, 0, CURRENT_TIME);
+	if (targetId == 0) {
+		glm::vec3 newTarget = cabinMat * point;
+		glm::vec3 newEye = newTarget + glm::vec3(CAMERA_DISTANCE,0,0);
+		cameraMat = glm::lookAt(newEye, newTarget, glm::vec3(0, 1, 0));
+		return cameraMat;
+	}
+	else if (targetId == 1) {
+		glm::vec3 newTarget = Trump::worldMat * point;
+		glm::vec3 newEye = Chicken::worldMat * point;
+		cameraMat = glm::lookAt(newEye + glm::vec3(0), newTarget, glm::vec3(0, 1, 0));
+		return cameraMat;
+	}
+	else if (targetId == 2) {
+		glm::vec3 newTarget = Chicken::worldMat * point;
+		glm::vec3 newEye = Trump::worldMat * point;
+		cameraMat = glm::lookAt(newEye + glm::vec3(0), newTarget, glm::vec3(0, 1, 0));
+		return cameraMat;
+	}
+	else {
+		std::cout << "FAILED TO USE CameraLookAt() invalid targetId" << std::endl;
+		cameraMat = glm::mat4(1);
+		return cameraMat;
+	}
+}
 
 void GLrender(float dt) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	RV::_modelView = glm::mat4(1.f);
-	RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
-	RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 
-	RV::_MVP = RV::_projection * RV::_modelView;
 
 	//Points::updatePoints();
 	switch (CURRENT_SCENE)
@@ -768,7 +802,39 @@ void GLrender(float dt) {
 		Trump::Update(dt);
 		Chicken::Update(dt);
 
-		//Wheel::draw();
+		static int cameraMode = 0;
+
+		// TIMER
+		static std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
+		std::chrono::time_point<std::chrono::steady_clock> currentTime = std::chrono::high_resolution_clock::now();
+
+		std::chrono::duration<double> span = std::chrono::duration_cast<std::chrono::duration<double>>(currentTime - startTime);
+
+		if (cameraMode == 0 && span.count() >= 2) {
+			cameraMode = 1;
+			startTime = std::chrono::high_resolution_clock::now();
+		}
+		else if (cameraMode == 1 && span.count() >= 1) {
+			cameraMode = 2;
+			startTime = std::chrono::high_resolution_clock::now();
+		}		
+		else if (cameraMode == 2 && span.count() >= 1) {
+			cameraMode = 1;
+			startTime = std::chrono::high_resolution_clock::now();
+		}
+		// ----
+
+		RV::_modelView = glm::mat4(1.f);
+		RV::_modelView = CameraLookAtMatrix(RV::_modelView, cameraMode);
+
+		//RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
+		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
+		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+
+
+		RV::_MVP = RV::_projection * RV::_modelView;
+
+		Wheel::draw();
 		Cabins::draw();
 		Base::draw();
 		Trump::draw();
