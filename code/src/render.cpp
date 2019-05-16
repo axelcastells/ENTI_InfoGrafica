@@ -402,7 +402,7 @@ namespace Cube {
 /////////////////////////////////////////////////
 // CABINS
 namespace Cabins {
-	int COUNT = 20;
+	int COUNT = 1; //20
 	GLuint vao;
 	GLuint vbo[3];
 
@@ -439,7 +439,6 @@ namespace Cabins {
 
 	}
 	void GetPositionInWheel(glm::mat4 &_objMat, int _index, float _t) {
-		_objMat = glm::mat4(1);
 
 		float axisA = WHEEL_DISTANCE * glm::cos(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
 		float axisB = WHEEL_DISTANCE * glm::sin(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
@@ -460,8 +459,8 @@ namespace Cabins {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-
 		for (int i = 0; i < COUNT; i++) {
+			objMat = glm::mat4(1);
 
 			GetPositionInWheel(objMat, i, CURRENT_TIME);
 			glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
@@ -615,9 +614,10 @@ namespace Trump {
 	}
 
 	void Update(float _dt) {
+		objMat = glm::mat4(1);
 		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
-
-		objMat = glm::translate(objMat, glm::vec3(0));
+		objMat = glm::translate(objMat, glm::vec3(0,-5.5f,-1.5f));
+		objMat = glm::scale(objMat, glm::vec3(2));
 	}
 
 	void draw() {
@@ -670,9 +670,10 @@ namespace Chicken {
 	}
 
 	void Update(float _dt) {
+		objMat = glm::mat4(1);
 		Cabins::GetPositionInWheel(objMat, 0, CURRENT_TIME);
-
-		objMat = glm::translate(objMat, glm::vec3(0));
+		objMat = glm::translate(objMat, glm::vec3(0, -4.5f, 1.5f));
+		objMat = glm::scale(objMat, glm::vec3(2,2,-2));
 	}
 
 	void draw() {
@@ -768,7 +769,7 @@ void GLrender(float dt) {
 		Chicken::Update(dt);
 
 		//Wheel::draw();
-		//Cabins::draw();
+		Cabins::draw();
 		Base::draw();
 		Trump::draw();
 		Chicken::draw();
