@@ -699,6 +699,19 @@ namespace Chicken {
 }
 
 
+void ReloadShaders() {
+	SHADERS[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
+	SHADERS[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+
+	PROGRAM = glCreateProgram();
+	glAttachShader(PROGRAM, SHADERS[0]);
+	glAttachShader(PROGRAM, SHADERS[1]);
+	glBindAttribLocation(PROGRAM, 0, "in_Position");
+	glBindAttribLocation(PROGRAM, 1, "in_Normal");
+	linkProgram(PROGRAM);
+}
+
+
 void GLinit(int width, int height) {
 	glViewport(0, 0, width, height);
 	glClearColor(0.2f, 0.2f, 0.2f, 1.f);
@@ -712,15 +725,11 @@ void GLinit(int width, int height) {
 
 
 	// Setup shaders & geometry
-	SHADERS[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
-	SHADERS[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+	ReloadShaders();
+	//SHADERS[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
+	//SHADERS[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
 
-	PROGRAM = glCreateProgram();
-	glAttachShader(PROGRAM, SHADERS[0]);
-	glAttachShader(PROGRAM, SHADERS[1]);
-	glBindAttribLocation(PROGRAM, 0, "in_Position");
-	glBindAttribLocation(PROGRAM, 1, "in_Normal");
-	linkProgram(PROGRAM);
+
 
 	Axis::setupAxis();
 	Cube::setupCube();
@@ -805,6 +814,7 @@ void GLrender(float dt) {
 		static int cameraMode = 0;
 
 		// TIMER
+#if(false)
 		static std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
 		std::chrono::time_point<std::chrono::steady_clock> currentTime = std::chrono::high_resolution_clock::now();
 
@@ -823,7 +833,7 @@ void GLrender(float dt) {
 			startTime = std::chrono::high_resolution_clock::now();
 		}
 		// ----
-
+#endif
 		RV::_modelView = glm::mat4(1.f);
 		RV::_modelView = CameraLookAtMatrix(RV::_modelView, cameraMode);
 
@@ -861,6 +871,8 @@ void GLrender(float dt) {
 	ImGui::Render();
 }
 
+
+
 void GUI() {
 	bool show = true;
 	ImGui::Begin("Physics Parameters", &show, 0);
@@ -872,6 +884,10 @@ void GUI() {
 		if (ImGui::Button("Current Scene")) {
 			if (CURRENT_SCENE == 0) CURRENT_SCENE = 1;
 			else if (CURRENT_SCENE == 1) CURRENT_SCENE = 0;
+		}
+
+		if (ImGui::Button("Reload Shaders")) {
+			ReloadShaders();
 		}
 		
 		/////////////////////////////////////////////////////TODO
