@@ -30,7 +30,7 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 
 #pragma region Global Vars
 static float WHEEL_DISTANCE = 56;
-static float FREQUENCE = 0.01f;
+static float FREQUENCE = 0.5f;
 static unsigned int CURRENT_SCENE = 0;
 static float CUBE_WIDTH = 1.2f;
 static float MUTATOR = 0.1f;
@@ -40,6 +40,16 @@ static float CAMERA_DISTANCE = 30;
 static float CURRENT_TIME;
 static GLuint PROGRAM;
 static GLuint SHADERS[2];
+
+static float AMBIENT_VALUE;
+static float SPECULAR_VALUE;
+static float DIFFUSE_VALUE;
+
+glm::vec3 col(.3f, .5f, .2f);
+glm::vec3 lightCol(1);
+glm::vec3 lightPos(5, 10, 0);
+//glm::vec3 camPos(0, 0, -10);
+
 #pragma endregion
 
 #define POINTS_COUNT 10
@@ -573,9 +583,17 @@ namespace Base {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
-
-
+		
+		
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
@@ -632,6 +650,14 @@ namespace Trump {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -690,6 +716,14 @@ namespace Chicken {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -837,9 +871,15 @@ void GLrender(float dt) {
 		RV::_modelView = glm::mat4(1.f);
 		RV::_modelView = CameraLookAtMatrix(RV::_modelView, cameraMode);
 
+		//RV::_modelView is the camera position
+
 		//RV::_modelView = glm::translate(RV::_modelView, glm::vec3(RV::panv[0], RV::panv[1], RV::panv[2]));
 		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
+
+		lightCol.x = Random(0, 1);
+		lightCol.y = Random(0, 1);
+		lightCol.z = Random(0, 1);
 
 
 		RV::_MVP = RV::_projection * RV::_modelView;
@@ -889,7 +929,19 @@ void GUI() {
 		if (ImGui::Button("Reload Shaders")) {
 			ReloadShaders();
 		}
+		/*glm::vec3 col(.3f, .5f, .2f);
+glm::vec3 lightCol(1);
+glm::vec3 lightPos(5, 10, 0);
+glm::vec3 camPos(0, 0, -10);*/
 		
+		ImGui::SliderFloat3("Light Position", &lightPos.x, -100, 100);
+		ImGui::SliderFloat3("Light Color", &lightCol.x, 0, 1, "%.3f");
+		ImGui::SliderFloat3("Object Color", &col.x, 0, 1, "%.3f");
+
+		ImGui::SliderFloat("Diffuse", &DIFFUSE_VALUE, 0, 1, "%.3f");
+		ImGui::SliderFloat("Ambient", &AMBIENT_VALUE, 0, 1, "%.3f");
+		ImGui::SliderFloat("Specular", &SPECULAR_VALUE, 0, 1, "%.3f");
+
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
 		// ...

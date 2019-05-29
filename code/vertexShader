@@ -2,12 +2,13 @@
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec3 in_Normal;
 
-
-out vec4 vert_Normal;
+out vec3 FragPos;
+out vec3 Normal;
 uniform mat4 objMat;
 uniform mat4 mv_Mat;
 uniform mat4 mvpMat;
 void main() {
+	FragPos = (mv_Mat * objMat * vec4(in_Position, 1.0)).xyz;
+	Normal = (mv_Mat * objMat * vec4(in_Normal, 0.0)).xyz;
 	gl_Position = mvpMat * objMat * vec4(in_Position, 1.0);
-	vert_Normal = mv_Mat * objMat * vec4(in_Normal, 0.0);
 }
