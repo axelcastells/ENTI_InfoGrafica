@@ -11,11 +11,12 @@ uniform float diffuseValue;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 objectColor;
+uniform float specularIntensity;
 
-uniform float pointLightTime;
 uniform float pointLightSpecular;
 uniform vec3 pointLightPos;
 uniform vec3 pointLightColor;
+uniform float pointSpecularIntensity;
 
 void main()
 {
@@ -31,13 +32,13 @@ void main()
 	// Specular
 	vec3 viewDir = normalize(FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), specularIntensity);
 	vec3 specular = specularValue * spec * lightColor;
 
 	// Specular Point
 	vec3 pointLightDir = normalize(pointLightPos - FragPos);
 	vec3 pointReflectDir = reflect(-pointLightDir, norm);
-	float pointSpec = pow(max(dot(viewDir, pointReflectDir), 0.0), 32);
+	float pointSpec = pow(max(dot(viewDir, pointReflectDir), 0.0), pointSpecularIntensity);
 	vec3 pointSpecular = pointLightSpecular * pointSpec * pointLightColor;
 
 	vec3 result = (ambient + diffuse + specular + pointSpecular) * objectColor;

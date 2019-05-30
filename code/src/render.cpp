@@ -45,18 +45,20 @@ static float AMBIENT_VALUE = 0;
 static float SPECULAR_VALUE = 0;
 static float DIFFUSE_VALUE = 0;
 
-glm::vec3 col(.3f, .5f, .2f);
-glm::vec3 lightCol(1);
-glm::vec3 lightPos(5, 10, 0);
+static glm::vec3 col(.3f, .5f, .2f);
+static glm::vec3 lightCol(1);
+static glm::vec3 lightPos(5, 10, 0);
+static float LIGHT_SPECULAR_INTENSITY = 1;
 //glm::vec3 camPos(0, 0, -10);
 
-static float POINT_LIGHT_TIME = 0;
 static glm::vec3 POINT_LIGHT_POS = { 0,0,0 };
-static glm::vec3 POINT_LIGHT_OFFSET = { 0,0,0 };
+static float POINT_LIGHT_OFFSET = 1;
 static glm::vec3 POINT_LIGHT_COL = { 0,0,0 };
 static float POINT_LIGHT_SPECULAR = 0;
 static float POINT_LIGHT_FREQ = 1.f;
+static float POINT_LIGHT_SPECULAR_INTENSITY = 1;
 
+static float OSCILATION_FREQUENCY = 1;
 
 static float TIME_SCALE = 1.f;
 
@@ -486,7 +488,9 @@ namespace Cabins {
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+
 		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
@@ -558,11 +562,13 @@ namespace Wheel {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
 		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
@@ -621,11 +627,13 @@ namespace Base {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
 		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
@@ -693,7 +701,9 @@ namespace Trump {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+
 		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
@@ -764,11 +774,13 @@ namespace Chicken {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
 		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
@@ -898,7 +910,6 @@ void GLrender(float dt) {
 		if (counter >= 360) {
 			counter = 0;
 		}
-		POINT_LIGHT_TIME = glm::sin(counter * POINT_LIGHT_FREQ);
 
 		Wheel::Update(dt);
 		Cabins::Update(dt);
@@ -907,8 +918,17 @@ void GLrender(float dt) {
 
 		glm::mat4 cabinTranslation(1);
 		Cabins::GetPositionInWheel(cabinTranslation, 0, CURRENT_TIME);
-		POINT_LIGHT_POS = RV::_modelView * cabinTranslation * glm::vec4(POINT_LIGHT_POS, 1);
-		POINT_LIGHT_POS += POINT_LIGHT_OFFSET;
+		POINT_LIGHT_POS = RV::_modelView * cabinTranslation * glm::vec4(0,0,0,1);
+
+
+		// OSCILATION
+		glm::vec3 offset(0);
+		offset.x = POINT_LIGHT_OFFSET * glm::cos(counter * OSCILATION_FREQUENCY);
+		offset.y = -(POINT_LIGHT_OFFSET * glm::abs(glm::sin(counter * OSCILATION_FREQUENCY)));
+
+		POINT_LIGHT_POS += offset;
+
+
 		static int cameraMode = 0;
 
 		// TIMER
@@ -1003,12 +1023,17 @@ glm::vec3 camPos(0, 0, -10);*/
 		ImGui::SliderFloat("Sky Diffuse", &DIFFUSE_VALUE, 0, 1, "%.3f");
 		ImGui::SliderFloat("Sky Ambient", &AMBIENT_VALUE, 0, 1, "%.3f");
 		ImGui::SliderFloat("Sky Specular", &SPECULAR_VALUE, 0, 1, "%.3f");
+		ImGui::SliderFloat("Sky Specular Intensity", &LIGHT_SPECULAR_INTENSITY, 0, 100, "%.3f");
+
 
 		ImGui::Text("Light Bulb");
-		ImGui::SliderFloat3("Point Light Position", &POINT_LIGHT_OFFSET.x, -1, 1);
+		ImGui::SliderFloat("Point Light Position", &POINT_LIGHT_OFFSET, 0, 3);
+		ImGui::SliderFloat("Point Light Oscilation", &OSCILATION_FREQUENCY, 0.1f, 3.f);
 		ImGui::SliderFloat3("Point Light Color", &POINT_LIGHT_COL.x, 0, 1, "%.3f");
 		ImGui::SliderFloat("Point Specular", &POINT_LIGHT_SPECULAR, 0, 1, "%.3f");
+		ImGui::SliderFloat("Point Specular Intensity", &POINT_LIGHT_SPECULAR_INTENSITY, 0, 100, "%.3f");
 
+		ImGui::Spacing();
 		ImGui::SliderFloat3("Object Color", &col.x, 0, 1, "%.3f");
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
