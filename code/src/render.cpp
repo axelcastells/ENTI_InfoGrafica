@@ -38,8 +38,8 @@ static float MUTATOR = 0.1f;
 static float CAMERA_DISTANCE = 30;
 
 static float CURRENT_TIME = 0;
-static GLuint PROGRAM = 0;
-static GLuint SHADERS[2];
+static GLuint PROGRAM[2];
+static GLuint SHADERS[4];
 
 static float AMBIENT_VALUE = 0;
 static float SPECULAR_VALUE = 0;
@@ -78,6 +78,9 @@ static float TIME_SCALE = 1.f;
 
 #define VERT_SHADER_CABINS "vertexShader"
 #define FRAG_SHADER_CABINS "fragmentShader"
+#define VERT_SHADER_STENCIL "vertexShaderStencil"
+#define FRAG_SHADER_STENCIL "fragmentShaderStencil"
+
 
 #define OBJ_PATH_CABIN "Cabin.obj"
 #define OBJ_PATH_WHEEL "Wheel.obj"
@@ -431,6 +434,8 @@ namespace Cabins {
 	GLuint vao;
 	GLuint vbo[3];
 
+	float outline = 1;
+
 	glm::mat4 objMat = glm::mat4(1.f);
 
 	std::vector<glm::vec3> dataVerts;
@@ -478,35 +483,72 @@ namespace Cabins {
 	}
 
 	void draw() {
+
+		glEnable(GL_DEPTH_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_STENCIL_BUFFER_BIT);
+
+		//glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the floor
+
+		//FLOOR
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+
 		glBindVertexArray(vao);
-		glUseProgram(PROGRAM);
+		glUseProgram(PROGRAM[0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
-		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
-		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 
 		for (int i = 0; i < COUNT; i++) {
 			objMat = glm::mat4(1);
 
 			GetPositionInWheel(objMat, i, CURRENT_TIME);
-			glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
 		}
+
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+		glUseProgram(PROGRAM[1]);
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+
+		for (int i = 0; i < COUNT; i++) {
+			objMat = glm::mat4(1);
+
+			GetPositionInWheel(objMat, i, CURRENT_TIME);
+			glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+			glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+			glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+
+		}
+
+		glStencilMask(0xFF);
+		glEnable(GL_DEPTH_TEST);
 		
 		//glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
@@ -556,26 +598,26 @@ namespace Wheel {
 
 	void draw() {
 		glBindVertexArray(vao);
-		glUseProgram(PROGRAM);
+		glUseProgram(PROGRAM[0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
-		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -621,26 +663,26 @@ namespace Base {
 
 	void draw() {
 		glBindVertexArray(vao);
-		glUseProgram(PROGRAM);
+		glUseProgram(PROGRAM[0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
-		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 		
 		
@@ -695,26 +737,26 @@ namespace Trump {
 
 	void draw() {
 		glBindVertexArray(vao);
-		glUseProgram(PROGRAM);
+		glUseProgram(PROGRAM[0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -768,26 +810,26 @@ namespace Chicken {
 
 	void draw() {
 		glBindVertexArray(vao);
-		glUseProgram(PROGRAM);
+		glUseProgram(PROGRAM[0]);
 
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
-		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
-		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
 
-		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
-		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
-		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -800,13 +842,22 @@ namespace Chicken {
 void ReloadShaders() {
 	SHADERS[0] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_CABINS).c_str(), GL_VERTEX_SHADER);
 	SHADERS[1] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_CABINS).c_str(), GL_FRAGMENT_SHADER);
+	SHADERS[2] = compileShader(ResourcesManager::ReadFile(VERT_SHADER_STENCIL).c_str(), GL_VERTEX_SHADER);
+	SHADERS[3] = compileShader(ResourcesManager::ReadFile(FRAG_SHADER_STENCIL).c_str(), GL_FRAGMENT_SHADER);
 
-	PROGRAM = glCreateProgram();
-	glAttachShader(PROGRAM, SHADERS[0]);
-	glAttachShader(PROGRAM, SHADERS[1]);
-	glBindAttribLocation(PROGRAM, 0, "in_Position");
-	glBindAttribLocation(PROGRAM, 1, "in_Normal");
-	linkProgram(PROGRAM);
+	PROGRAM[0] = glCreateProgram();
+	glAttachShader(PROGRAM[0], SHADERS[0]);
+	glAttachShader(PROGRAM[0], SHADERS[1]);
+	glBindAttribLocation(PROGRAM[0], 0, "in_Position");
+	glBindAttribLocation(PROGRAM[0], 1, "in_Normal");
+	linkProgram(PROGRAM[0]);	
+	
+	PROGRAM[1] = glCreateProgram();
+	glAttachShader(PROGRAM[1], SHADERS[2]);
+	glAttachShader(PROGRAM[1], SHADERS[3]);
+	glBindAttribLocation(PROGRAM[1], 0, "in_Position");
+	glBindAttribLocation(PROGRAM[1], 1, "in_Normal");
+	linkProgram(PROGRAM[1]);
 }
 
 

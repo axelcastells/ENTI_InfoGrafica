@@ -1,0 +1,13 @@
+#version 330
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec3 in_Normal;
+
+uniform mat4 objMat;
+uniform mat4 mv_Mat;
+uniform mat4 mvpMat;
+
+uniform float outline;
+
+void main() {
+	gl_Position = mvpMat * objMat * vec4(in_Position, 1.0);
+}
