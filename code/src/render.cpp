@@ -30,25 +30,35 @@ float MapValue(float val, float inMin, float inMax, float outMin, float outMax) 
 
 #pragma region Global Vars
 static float WHEEL_DISTANCE = 56;
-static float FREQUENCE = 0.5f;
+static float WHEEL_FREQUENCE = 0.01f;
 static unsigned int CURRENT_SCENE = 0;
 static float CUBE_WIDTH = 1.2f;
 static float MUTATOR = 0.1f;
 
 static float CAMERA_DISTANCE = 30;
 
-static float CURRENT_TIME;
-static GLuint PROGRAM;
+static float CURRENT_TIME = 0;
+static GLuint PROGRAM = 0;
 static GLuint SHADERS[2];
 
-static float AMBIENT_VALUE;
-static float SPECULAR_VALUE;
-static float DIFFUSE_VALUE;
+static float AMBIENT_VALUE = 0;
+static float SPECULAR_VALUE = 0;
+static float DIFFUSE_VALUE = 0;
 
 glm::vec3 col(.3f, .5f, .2f);
 glm::vec3 lightCol(1);
 glm::vec3 lightPos(5, 10, 0);
 //glm::vec3 camPos(0, 0, -10);
+
+static float POINT_LIGHT_TIME = 0;
+static glm::vec3 POINT_LIGHT_POS = { 0,0,0 };
+static glm::vec3 POINT_LIGHT_OFFSET = { 0,0,0 };
+static glm::vec3 POINT_LIGHT_COL = { 0,0,0 };
+static float POINT_LIGHT_SPECULAR = 0;
+static float POINT_LIGHT_FREQ = 1.f;
+
+
+static float TIME_SCALE = 1.f;
 
 #pragma endregion
 
@@ -73,7 +83,7 @@ glm::vec3 lightPos(5, 10, 0);
 #define OBJ_PATH_TRUMP "Trump.obj"
 #define OBJ_PATH_CHICKEN "Chicken.obj"
 
-#define SINGLE_FRAME_ANGLE(_dt) (float)(TAU * FREQUENCE * _dt)
+#define SINGLE_FRAME_ANGLE(_dt) (float)(TAU * WHEEL_FREQUENCE * _dt)
 
 ///////// fw decl
 namespace ImGui {
@@ -453,8 +463,8 @@ namespace Cabins {
 	}
 	void GetPositionInWheel(glm::mat4 &_objMat, int _index, float _t) {
 
-		float axisA = WHEEL_DISTANCE * glm::cos(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
-		float axisB = WHEEL_DISTANCE * glm::sin(TAU * FREQUENCE*_t + (TAU*_index) / COUNT);
+		float axisA = WHEEL_DISTANCE * glm::cos(TAU * WHEEL_FREQUENCE*_t + (TAU*_index) / COUNT);
+		float axisB = WHEEL_DISTANCE * glm::sin(TAU * WHEEL_FREQUENCE*_t + (TAU*_index) / COUNT);
 
 		glm::vec3 traslation(0, axisA, axisB);
 
@@ -471,6 +481,20 @@ namespace Cabins {
 
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+
+		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 		for (int i = 0; i < COUNT; i++) {
 			objMat = glm::mat4(1);
@@ -533,6 +557,19 @@ namespace Wheel {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
+		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
+
+		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
@@ -587,6 +624,11 @@ namespace Base {
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
 		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
@@ -650,6 +692,11 @@ namespace Trump {
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM, "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
@@ -720,6 +767,11 @@ namespace Chicken {
 		glUniform1f(glGetUniformLocation(PROGRAM, "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM, "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightTime"), POINT_LIGHT_TIME);
+		glUniform1f(glGetUniformLocation(PROGRAM, "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM, "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
 		glUniform3fv(glGetUniformLocation(PROGRAM, "objectColor"), 1, glm::value_ptr(col));
 		glUniform3fv(glGetUniformLocation(PROGRAM, "lightColor"), 1, glm::value_ptr(lightCol));
@@ -830,6 +882,7 @@ glm::mat4 CameraLookAtMatrix(glm::mat4 cameraMat, unsigned int targetId) {
 }
 
 void GLrender(float dt) {
+	dt *= TIME_SCALE;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -840,11 +893,22 @@ void GLrender(float dt) {
 	{
 	case 0:
 	{
+		static float counter = 0;
+		counter += dt;
+		if (counter >= 360) {
+			counter = 0;
+		}
+		POINT_LIGHT_TIME = glm::sin(counter * POINT_LIGHT_FREQ);
+
 		Wheel::Update(dt);
 		Cabins::Update(dt);
 		Trump::Update(dt);
 		Chicken::Update(dt);
 
+		glm::mat4 cabinTranslation(1);
+		Cabins::GetPositionInWheel(cabinTranslation, 0, CURRENT_TIME);
+		POINT_LIGHT_POS = RV::_modelView * cabinTranslation * glm::vec4(POINT_LIGHT_POS, 1);
+		POINT_LIGHT_POS += POINT_LIGHT_OFFSET;
 		static int cameraMode = 0;
 
 		// TIMER
@@ -877,12 +941,9 @@ void GLrender(float dt) {
 		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[1], glm::vec3(1.f, 0.f, 0.f));
 		//RV::_modelView = glm::rotate(RV::_modelView, RV::rota[0], glm::vec3(0.f, 1.f, 0.f));
 
-		lightCol.x = Random(0, 1);
-		lightCol.y = Random(0, 1);
-		lightCol.z = Random(0, 1);
-
-
 		RV::_MVP = RV::_projection * RV::_modelView;
+
+
 
 		Wheel::draw();
 		Cabins::draw();
@@ -934,14 +995,21 @@ glm::vec3 lightCol(1);
 glm::vec3 lightPos(5, 10, 0);
 glm::vec3 camPos(0, 0, -10);*/
 		
-		ImGui::SliderFloat3("Light Position", &lightPos.x, -100, 100);
-		ImGui::SliderFloat3("Light Color", &lightCol.x, 0, 1, "%.3f");
+		ImGui::Text("[Lights]");
+		ImGui::Text("Sky");
+		ImGui::SliderFloat3("Sky Light Position", &lightPos.x, -100, 100);
+		ImGui::SliderFloat3("Sky Light Color", &lightCol.x, 0, 1, "%.3f");
+
+		ImGui::SliderFloat("Sky Diffuse", &DIFFUSE_VALUE, 0, 1, "%.3f");
+		ImGui::SliderFloat("Sky Ambient", &AMBIENT_VALUE, 0, 1, "%.3f");
+		ImGui::SliderFloat("Sky Specular", &SPECULAR_VALUE, 0, 1, "%.3f");
+
+		ImGui::Text("Light Bulb");
+		ImGui::SliderFloat3("Point Light Position", &POINT_LIGHT_OFFSET.x, -1, 1);
+		ImGui::SliderFloat3("Point Light Color", &POINT_LIGHT_COL.x, 0, 1, "%.3f");
+		ImGui::SliderFloat("Point Specular", &POINT_LIGHT_SPECULAR, 0, 1, "%.3f");
+
 		ImGui::SliderFloat3("Object Color", &col.x, 0, 1, "%.3f");
-
-		ImGui::SliderFloat("Diffuse", &DIFFUSE_VALUE, 0, 1, "%.3f");
-		ImGui::SliderFloat("Ambient", &AMBIENT_VALUE, 0, 1, "%.3f");
-		ImGui::SliderFloat("Specular", &SPECULAR_VALUE, 0, 1, "%.3f");
-
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
 		// ...
