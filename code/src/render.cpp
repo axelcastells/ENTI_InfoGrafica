@@ -572,6 +572,9 @@ namespace Wheel {
 	GLuint vbo[3];
 	glm::mat4 objMat = glm::mat4(1.f);
 
+	float outline = 1.1f;
+	glm::vec3 color = { 1,0,0 };
+
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
 	std::vector<glm::vec2> dataUvs;
@@ -607,6 +610,17 @@ namespace Wheel {
 	}
 
 	void draw() {
+		glEnable(GL_STENCIL_TEST);
+
+		// Draw floor
+
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF); // Write to stencil buffer
+		glDepthMask(GL_FALSE); // Don't write to depth buffer
+		glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+
 		glBindVertexArray(vao);
 		glUseProgram(PROGRAM[0]);
 
@@ -631,6 +645,20 @@ namespace Wheel {
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		glStencilMask(0x00); // Don't write anything to stencil buffer
+		glDepthMask(GL_TRUE); // Write to depth buffer
+
+		glUseProgram(PROGRAM[1]);
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+		glUniform3fv(glGetUniformLocation(PROGRAM[1], "color"), 1, glm::value_ptr(color));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+		glDisable(GL_STENCIL_TEST);
+
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
@@ -640,6 +668,9 @@ namespace Base {
 	GLuint vao;
 	GLuint vbo[3];
 	glm::mat4 objMat = glm::mat4(1.f);
+
+	float outline = 1.1f;
+	glm::vec3 color = { 1,0,0 };
 
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
@@ -672,6 +703,17 @@ namespace Base {
 	}
 
 	void draw() {
+		glEnable(GL_STENCIL_TEST);
+
+		// Draw floor
+
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF); // Write to stencil buffer
+		glDepthMask(GL_FALSE); // Don't write to depth buffer
+		glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+
 		glBindVertexArray(vao);
 		glUseProgram(PROGRAM[0]);
 
@@ -694,8 +736,22 @@ namespace Base {
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
-		
-		
+
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		glStencilMask(0x00); // Don't write anything to stencil buffer
+		glDepthMask(GL_TRUE); // Write to depth buffer
+
+		glUseProgram(PROGRAM[1]);
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+		glUniform3fv(glGetUniformLocation(PROGRAM[1], "color"), 1, glm::value_ptr(color));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+		glDisable(GL_STENCIL_TEST);
+
 		glUseProgram(0);
 		glBindVertexArray(0);
 	}
@@ -706,6 +762,9 @@ namespace Trump {
 	GLuint vbo[3];
 	glm::mat4 objMat = glm::mat4(1.f);
 	glm::mat4 worldMat(1);
+
+	float outline = 1.1f;
+	glm::vec3 color = { 1,0,0 };
 
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
@@ -746,6 +805,17 @@ namespace Trump {
 	}
 
 	void draw() {
+		glEnable(GL_STENCIL_TEST);
+
+		// Draw floor
+
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF); // Write to stencil buffer
+		glDepthMask(GL_FALSE); // Don't write to depth buffer
+		glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+
 		glBindVertexArray(vao);
 		glUseProgram(PROGRAM[0]);
 
@@ -756,19 +826,33 @@ namespace Trump {
 		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularIntensity"), LIGHT_SPECULAR_INTENSITY);
 		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointSpecularIntensity"), POINT_LIGHT_SPECULAR_INTENSITY);
 
-		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
-		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
-		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
-
 		glUniform1f(glGetUniformLocation(PROGRAM[0], "ambientValue"), AMBIENT_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM[0], "specularValue"), SPECULAR_VALUE);
 		glUniform1f(glGetUniformLocation(PROGRAM[0], "diffuseValue"), DIFFUSE_VALUE);
+
+		glUniform1f(glGetUniformLocation(PROGRAM[0], "pointLightSpecular"), POINT_LIGHT_SPECULAR);
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightPos"), 1, glm::value_ptr(POINT_LIGHT_POS));
+		glUniform3fv(glGetUniformLocation(PROGRAM[0], "pointLightColor"), 1, glm::value_ptr(POINT_LIGHT_COL));
 
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "objectColor"), 1, glm::value_ptr(col));
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightColor"), 1, glm::value_ptr(lightCol));
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		glStencilMask(0x00); // Don't write anything to stencil buffer
+		glDepthMask(GL_TRUE); // Write to depth buffer
+
+		glUseProgram(PROGRAM[1]);
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+		glUniform3fv(glGetUniformLocation(PROGRAM[1], "color"), 1, glm::value_ptr(color));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+		glDisable(GL_STENCIL_TEST);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -779,6 +863,9 @@ namespace Chicken {
 	GLuint vbo[3];
 	glm::mat4 objMat(1);
 	glm::mat4 worldMat(1);
+
+	float outline = 1.1f;
+	glm::vec3 color = { 1,0,0 };
 
 	std::vector<glm::vec3> dataVerts;
 	std::vector<glm::vec3> dataNorms;
@@ -819,6 +906,17 @@ namespace Chicken {
 	}
 
 	void draw() {
+		glEnable(GL_STENCIL_TEST);
+
+		// Draw floor
+
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF); // Write to stencil buffer
+		glDepthMask(GL_FALSE); // Don't write to depth buffer
+		glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+
 		glBindVertexArray(vao);
 		glUseProgram(PROGRAM[0]);
 
@@ -842,6 +940,20 @@ namespace Chicken {
 		glUniform3fv(glGetUniformLocation(PROGRAM[0], "lightPos"), 1, glm::value_ptr(lightPos));
 		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		glStencilMask(0x00); // Don't write anything to stencil buffer
+		glDepthMask(GL_TRUE); // Write to depth buffer
+
+		glUseProgram(PROGRAM[1]);
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
+		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
+		glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+		glUniform3fv(glGetUniformLocation(PROGRAM[1], "color"), 1, glm::value_ptr(color));
+		glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+
+		glDisable(GL_STENCIL_TEST);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
