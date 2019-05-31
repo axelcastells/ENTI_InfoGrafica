@@ -1208,6 +1208,18 @@ glm::vec3 camPos(0, 0, -10);*/
 
 		ImGui::Spacing();
 		ImGui::SliderFloat3("Object Color", &col.x, 0, 1, "%.3f");
+		ImGui::Spacing();
+		ImGui::Text("[Outlines]");
+		ImGui::SliderFloat3("Cabin Color", &Cabins::color.x, 0, 1);
+		ImGui::SliderFloat("Cabin Outline", &Cabins::outline, 1, 2);
+		ImGui::SliderFloat3("Base Color", &Base::color.x, 0, 1);
+		ImGui::SliderFloat("Base Outline", &Base::outline, 1, 2);
+		ImGui::SliderFloat3("Wheel Color", &Wheel::color.x, 0, 1);
+		ImGui::SliderFloat("Wheel Outline", &Wheel::outline, 1, 2);
+		ImGui::SliderFloat3("Chicken Color", &Chicken::color.x, 0, 1);
+		ImGui::SliderFloat("Chicken Outline", &Chicken::outline, 1, 2);
+		ImGui::SliderFloat3("Trump Color", &Trump::color.x, 0, 1);
+		ImGui::SliderFloat("Trump Outline", &Trump::outline, 1, 2);
 		/////////////////////////////////////////////////////TODO
 		// Do your GUI code here....
 		// ...
