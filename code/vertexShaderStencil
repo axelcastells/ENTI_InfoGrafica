@@ -9,5 +9,6 @@ uniform mat4 mvpMat;
 uniform float outline;
 
 void main() {
-	gl_Position = mvpMat * objMat * vec4(in_Position, 1.0);
+	vec3 pos = (vec4(in_Position, 1) * objMat * mat4(outline)).xyz;
+	gl_Position = mvpMat * objMat * vec4(pos, 1.0);
 }

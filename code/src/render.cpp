@@ -434,7 +434,8 @@ namespace Cabins {
 	GLuint vao;
 	GLuint vbo[3];
 
-	float outline = 1;
+	float outline = 1.1f;
+	glm::vec3 color = { 1,0,0 };
 
 	glm::mat4 objMat = glm::mat4(1.f);
 
@@ -483,21 +484,21 @@ namespace Cabins {
 	}
 
 	void draw() {
-
-		glEnable(GL_DEPTH_TEST);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glClear(GL_STENCIL_BUFFER_BIT);
-
-		//glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the floor
-
-		//FLOOR
-
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
-
 		glBindVertexArray(vao);
+
+		glEnable(GL_STENCIL_TEST);
+
+		// Draw floor
+
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); // Set any stencil to 1
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF); // Write to stencil buffer
+		glDepthMask(GL_FALSE); // Don't write to depth buffer
+		glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer (0 by default)
+
+
+
 		glUseProgram(PROGRAM[0]);
 
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[0], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
@@ -529,10 +530,16 @@ namespace Cabins {
 		}
 
 
-		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
+
+
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Pass test if stencil value is 1
+		glStencilMask(0x00); // Don't write anything to stencil buffer
+		glDepthMask(GL_TRUE); // Write to depth buffer
+
+
+
 		glUseProgram(PROGRAM[1]);
+
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mv_Mat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_modelView));
 		glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "mvpMat"), 1, GL_FALSE, glm::value_ptr(RenderVars::_MVP));
 
@@ -540,17 +547,20 @@ namespace Cabins {
 			objMat = glm::mat4(1);
 
 			GetPositionInWheel(objMat, i, CURRENT_TIME);
+
+			//objMat = glm::scale(glm::translate(objMat, glm::vec3(0, 0, -1)), glm::vec3(1, 1, -1));
+
 			glUniformMatrix4fv(glGetUniformLocation(PROGRAM[1], "objMat"), 1, GL_FALSE, glm::value_ptr(objMat));
 			glUniform1f(glGetUniformLocation(PROGRAM[1], "outline"), outline);
+			glUniform3fv(glGetUniformLocation(PROGRAM[1], "color"), 1, glm::value_ptr(color));
 			glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
 
 
 		}
-
-		glStencilMask(0xFF);
-		glEnable(GL_DEPTH_TEST);
 		
-		//glDrawArrays(GL_TRIANGLES, 0, dataVerts.size());
+		glDisable(GL_STENCIL_TEST);
+
+
 
 		glUseProgram(0);
 		glBindVertexArray(0);
