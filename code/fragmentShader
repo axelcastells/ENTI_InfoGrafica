@@ -1,9 +1,56 @@
 #version 330 core
 out vec4 FragColor;
-  
-//in vec4 vertexColor; // the input variable from the vertex shader (same name and same type)  
+
+in vec3 FragPos;
+in vec3 Normal;
+
+uniform float ambientValue;
+uniform float specularValue;
+uniform float diffuseValue;
+
+uniform vec3 lightPos;
+uniform vec3 lightColor;
+uniform vec3 objectColor;
+uniform float specularIntensity;
+
+uniform float pointLightSpecular;
+uniform vec3 pointLightPos;
+uniform vec3 pointLightColor;
+uniform float pointSpecularIntensity;
 
 void main()
 {
-    FragColor = vec4(0,0,0,0);// vertexColor;
-} 
+	// Ambient
+	vec3 ambient = ambientValue * lightColor;
+	
+	// Diffuse 
+	vec3 norm = normalize(Normal);
+	vec3 lightDir = normalize(lightPos - FragPos);
+	
+	float toonClamp = dot(norm, lightDir);
+	
+	if(toonClamp < 0.2) toonClamp = 0;
+	else if(toonClamp >= 0.2 && toonClamp < 0.4) toonClamp = 0.2;
+	else if(toonClamp >= 0.4 && toonClamp < 0.5) toonClamp = 0.4;
+	else if(toonClamp >= 0.5) toonClamp = 1;
+	
+	float diff = max(toonClamp, 0.0);
+	vec3 diffuse = diffuseValue * (diff * lightColor);
+
+	// Specular
+	//vec3 viewDir = normalize(FragPos);
+	//vec3 reflectDir = reflect(-lightDir, norm);
+	//float spec = pow(max(dot(viewDir, reflectDir), 0.0), specularIntensity);
+	//vec3 specular = specularValue * spec * lightColor;
+
+	// Specular Point
+	vec3 viewDir = normalize(FragPos);
+	vec3 pointLightDir = normalize(pointLightPos - FragPos);
+	vec3 pointReflectDir = reflect(-pointLightDir, norm);
+	float pointSpec = pow(max(dot(viewDir, pointReflectDir), 0.0), pointSpecularIntensity);
+	vec3 pointSpecular = pointLightSpecular * pointSpec * pointLightColor;
+
+	//vec3 result = (ambient + diffuse + specular + pointSpecular) * objectColor;
+	vec3 result = (ambient + diffuse + pointSpecular) * objectColor;
+	FragColor = vec4(result, 1.0);
+}
